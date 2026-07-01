@@ -1,7 +1,7 @@
 import Image from "next/image";
-import LoginForm from "./components/LoginForm";
+import LoginForm from "../components/LoginForm";
 
-export default function Home() {
+export default function Login() {
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-zinc-50 dark:bg-black font-['Poppins', sans-serif]">
       <div className="absolute inset-0 z-99 pointer-events-none select-none">       

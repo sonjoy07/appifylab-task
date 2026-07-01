@@ -1,9 +1,9 @@
 import Image from "next/image";
-import LoginForm from "./components/LoginForm";
+import LoginForm from "../components/RegisterForm";
 
-export default function Home() {
+export default function Register() {
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-zinc-50 dark:bg-black font-['Poppins', sans-serif]">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-zinc-50 dark:bg-black">
       <div className="absolute inset-0 z-99 pointer-events-none select-none">       
         
         <div className="absolute top-0 -left-50 w-[500px] h-[300px] sm:w-[500px] sm:h-[500px]">
@@ -42,7 +42,7 @@ export default function Home() {
         <div className="relative hidden w-2/3 lg:block mt-20 pr-24">
           <Image
             className="h-8 w-auto object-cotain"
-            src="/login.png"
+            src="/registration.png"
             alt="Next.js logo"
             width={0}
             height={0}
