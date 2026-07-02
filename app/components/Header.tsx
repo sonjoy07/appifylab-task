@@ -1,7 +1,22 @@
+'use client'
 import Image from 'next/image'
-import React from 'react'
+import React, { JSX, useState, useEffect, useRef } from 'react'
+import { logoutAction } from '@/app/actions/auth';
 
 export default function Header() {
+    const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown automatically if user clicks anywhere outside of it
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
     return (
         <header className="sticky px-25 py-10 top-0 z-50 flex h-16 w-full items-center justify-between border-b border-slate-100 bg-white">
 
@@ -38,11 +53,11 @@ export default function Header() {
 
 
             {/* 3. RIGHT ZONE: ACTION INTERFACES & PROFILE DRAWER */}
-            <div className="flex items-center justify-end gap-12 w-1/2">
+            <div className="flex items-center justify-end gap-12 w-1/2" ref={dropdownRef}>
 
                 <button className="relative flex h-full items-center justify-center px-2 text-[#1890FF] cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 18 21">
-                        <path className="_home_active" stroke="currentcolor" stroke-width="1.5" stroke-opacity=".6" d="M1 9.924c0-1.552 0-2.328.314-3.01.313-.682.902-1.187 2.08-2.196l1.143-.98C6.667 1.913 7.732 1 9 1c1.268 0 2.333.913 4.463 2.738l1.142.98c1.179 1.01 1.768 1.514 2.081 2.196.314.682.314 1.458.314 3.01v4.846c0 2.155 0 3.233-.67 3.902-.669.67-1.746.67-3.901.67H5.57c-2.155 0-3.232 0-3.902-.67C1 18.002 1 16.925 1 14.77V9.924z"></path><path className="_home_active" stroke="currentcolor" stroke-opacity=".6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.857 19.341v-5.857a1 1 0 00-1-1H7.143a1 1 0 00-1 1v5.857"></path>
+                        <path className="_home_active" stroke="currentcolor" strokeWidth="1.5" strokeOpacity=".6" d="M1 9.924c0-1.552 0-2.328.314-3.01.313-.682.902-1.187 2.08-2.196l1.143-.98C6.667 1.913 7.732 1 9 1c1.268 0 2.333.913 4.463 2.738l1.142.98c1.179 1.01 1.768 1.514 2.081 2.196.314.682.314 1.458.314 3.01v4.846c0 2.155 0 3.233-.67 3.902-.669.67-1.746.67-3.901.67H5.57c-2.155 0-3.232 0-3.902-.67C1 18.002 1 16.925 1 14.77V9.924z"></path><path className="_home_active" stroke="currentcolor" strokeOpacity=".6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11.857 19.341v-5.857a1 1 0 00-1-1H7.143a1 1 0 00-1 1v5.857"></path>
                     </svg>
                     {/* Active Accent Border Indicator */}
                     <div className="absolute -bottom-[30px] inset-x-0 h-[3px] bg-[#1890FF] rounded-t-full"></div>
@@ -108,13 +123,22 @@ export default function Header() {
 
                     <div className="absolute -bottom-[30px] inset-x-0 h-[3px] bg-[#1890FF] rounded-t-full opacity-0 group-hover:opacity-100 transition-opacity duration-150"></div>
                 </button>
-                <div className="flex items-center gap-2 border-l border-slate-100 pl-4 cursor-pointer group">
+                <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className={`flex items-center gap-2 border-l border-slate-100 pl-4 cursor-pointer py-2 select-none ${isDropdownOpen ? 'bg-slate-50 rounded-xl px-2 -ml-2' : ''}`}>
                     <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-200">
-                        <img
-                            src="https://unsplash.com"
-                            alt="Dylan Field"
-                            className="h-full w-full object-cover"
-                        />
+                        <svg
+                            xmlns="http://w3.org"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-full w-full bg-slate-100 text-slate-400 p-2"
+                        >
+                            <path d="M18 21a6 6 0 0 0-12 0" />
+                            <circle cx="12" cy="10" r="4" />
+                            <circle cx="12" cy="12" r="10" />
+                        </svg>
                     </div>
                     <span className="hidden text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors md:block">
                         Dylan Field
@@ -124,7 +148,47 @@ export default function Header() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                 </div>
+                {isDropdownOpen && (
+                    <div className="absolute right-0 top-12 z-50 w-[240px] rounded-2xl border border-slate-100 bg-white p-2 font-sans shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
+                        <div className="flex flex-col gap-0.5">
 
+                            {/* Profile Link Option */}
+                            <button type="button" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
+                                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>My Profile</span>
+                            </button>
+
+                            {/* Account Settings Option */}
+                            <button type="button" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
+                                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>Settings</span>
+                            </button>
+
+                            {/* Thin Partition Splitter Line */}
+                            <hr className="my-1.5 border-t border-slate-100" />
+
+                            <form action={logoutAction} className="w-full">
+                                <button
+                                    type="submit"
+                                    className="group/logout flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                                >
+                                    {/* Logout Icon with matching hover red fill */}
+                                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500 group-hover/logout:bg-red-500 group-hover/logout:text-white transition-colors">
+                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                    </div>
+                                    <span className="mt-0.5">Log Out</span>
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+                )}
             </div>
 
         </header>

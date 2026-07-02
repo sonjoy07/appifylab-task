@@ -1,5 +1,14 @@
 "use client"
 import React, { JSX, useEffect, useRef, useState } from 'react'
+import ReactionSelector from './ReactionSelector';
+import { PostResponse } from '@/app/actions/posts';
+import ReactTimeAgo from "react-time-ago"
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+
+if (!TimeAgo.alreadyRegistered?.(en)) {
+  TimeAgo.addDefaultLocale(en);
+}
 
 interface PostData {
     authorName: string;
@@ -19,25 +28,24 @@ interface MenuOption {
     isDanger?: boolean;
 }
 
-export default function Post() {
+export default function Post( {post}: {post: PostResponse}) {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
-    const post: PostData = {
-        authorName: 'Karim Saif',
-        avatarUrl: 'https://unsplash.com',
-        timeAgo: '5 minute ago',
-        privacy: 'Public',
-        textContent: '-Healthy Tracking App',
-        mediaImageUrl: 'https://unsplash.com', // Restaurant setting matching reference
-        commentsCount: 12,
-        sharesCount: 122,
-        reactionsPreview: [
-            'https://unsplash.com',
-            'https://unsplash.com',
-            'https://unsplash.com',
-            'https://unsplash.com',
-        ]
-    };
+    //  post = {
+    //     timeAgo: '5 minute ago',
+    //     privacy: 'Public',
+    //     textContent: '-Healthy Tracking App',
+    //     mediaImageUrl: 'https://unsplash.com', // Restaurant setting matching reference
+    //     commentsCount: 12,
+    //     sharesCount: 122,
+    //     reactionsPreview: [
+    //         'https://unsplash.com',
+    //         'https://unsplash.com',
+    //         'https://unsplash.com',
+    //         'https://unsplash.com',
+    //     ]
+    // };
+    console.log('post',post.user.firstName)
     const options: MenuOption[] = [
         {
             label: 'Save Post',
@@ -100,15 +108,29 @@ export default function Post() {
                 <div className="flex items-center gap-3.5">
                     {/* Author Pfp */}
                     <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
-                        <img src={post.avatarUrl} alt={post.authorName} className="h-full w-full object-cover" />
+                        {/* <img src={post.avatarUrl} alt={post.authorName} className="h-full w-full object-cover" /> */}
+                        <svg
+                            xmlns="http://w3.org"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-full w-full bg-slate-100 text-slate-400 p-2"
+                        >
+                            <path d="M18 21a6 6 0 0 0-12 0" />
+                            <circle cx="12" cy="10" r="4" />
+                            <circle cx="12" cy="12" r="10" />
+                        </svg>
                     </div>
                     {/* Metadata Block */}
                     <div className="flex flex-col">
                         <span className="text-[15px] font-bold text-slate-800 tracking-wide hover:text-[#1890FF] cursor-pointer transition-colors leading-tight">
-                            {post.authorName}
+                            {post.user?.firstName} {post.user?.lastName}
                         </span>
                         <span className="text-[13px] text-slate-400 font-medium mt-1">
-                            {post.timeAgo} . {post.privacy}
+                            <ReactTimeAgo date={post.createdAt} locale="bn"/> . {post.privacy}
                         </span>
                     </div>
                 </div>
@@ -138,16 +160,16 @@ export default function Post() {
                                     >
                                         {/* Rounded Icon Accent Circles */}
                                         <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors ${option.isDanger
-                                                ? 'bg-red-50 text-red-500 group-hover:bg-red-500 group-hover:text-white'
-                                                : 'bg-[#E6F7FF] text-[#1890FF] group-hover:bg-[#1890FF] group-hover:text-white'
+                                            ? 'bg-red-50 text-red-500 group-hover:bg-red-500 group-hover:text-white'
+                                            : 'bg-[#E6F7FF] text-[#1890FF] group-hover:bg-[#1890FF] group-hover:text-white'
                                             }`}>
                                             {option.icon}
                                         </div>
 
                                         {/* Action Labels */}
                                         <span className={`text-[14px] font-medium tracking-wide transition-colors ${option.isDanger
-                                                ? 'text-red-500 group-hover:text-red-600'
-                                                : 'text-slate-600 group-hover:text-slate-900'
+                                            ? 'text-red-500 group-hover:text-red-600'
+                                            : 'text-slate-600 group-hover:text-slate-900'
                                             }`}>
                                             {option.label}
                                         </span>
@@ -166,8 +188,8 @@ export default function Post() {
                 </p>
             </div>
 
-            {/* 3. ATTACHED EMBEDDED MEDIA CONTENT IMAGE */}
-            <div className="w-full px-5 mb-4">
+            
+            {post.mediaImageUrl && <div className="w-full px-5 mb-4">
                 <div className="overflow-hidden rounded-xl border border-slate-100/50 max-h-[420px] flex items-center justify-center bg-slate-50">
                     <img
                         src={post.mediaImageUrl}
@@ -175,7 +197,7 @@ export default function Post() {
                         className="w-full h-auto object-cover"
                     />
                 </div>
-            </div>
+            </div>}
 
             {/* 4. METRICS ROW PANEL (Likes Overlap Cluster & Counter Stats) */}
             <div className="flex items-center justify-between border-b border-slate-100/80 px-5 pb-4 mb-1">
@@ -183,36 +205,42 @@ export default function Post() {
                 {/* Left Side: Overlapping Reactions Stack */}
                 <div className="flex items-center">
                     <div className="flex -space-x-2 overflow-hidden py-1">
-                        {post.reactionsPreview.map((url, idx) => (
-                            <img
+                        {/* {post.reactionsPreview.map((url, idx) => (
+                            <svg
                                 key={idx}
-                                className="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover"
-                                src={url}
-                                alt="User reaction avatar placeholder"
-                            />
-                        ))}
+                                xmlns="http://w3.org"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="h-5 w-5 rounded-full ring-2 ring-white text-[#1890FF] bg-amber-50"
+                            >
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        ))} */}
                     </div>
                     {/* Reaction Extent Total Counter Badge */}
-                    <div className="ml-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#1890FF] text-[10px] font-bold text-white ring-2 ring-white select-none">
-                        9+
-                    </div>
+                    {post.reactionsCount.total !== 0 &&<div className="ml-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#1890FF] text-[10px] font-bold text-white ring-2 ring-white select-none">
+                        {post.reactionsCount.total>9 ? `${post.reactionsCount.total}+`: post.reactionsCount.total}
+                    </div>}
                 </div>
 
                 {/* Right Side: Comments and Shares Counts */}
                 <div className="flex items-center gap-3.5 text-[14px] text-slate-400 font-medium select-none">
-                    <span className="hover:underline cursor-pointer"><strong className="text-slate-700 font-semibold">{post.commentsCount}</strong> Comment</span>
-                    <span className="hover:underline cursor-pointer"><strong className="text-slate-700 font-semibold">{post.sharesCount}</strong> Share</span>
+                    <span className="hover:underline cursor-pointer"><strong className="text-slate-700 font-semibold">{post.totalComments}</strong> Comment</span>
+                    <span className="hover:underline cursor-pointer"><strong className="text-slate-700 font-semibold">0</strong> Share</span>
                 </div>
             </div>
 
             {/* 5. INTERACTIVE FOOTER ACTIONS PANEL ROW */}
             <div className="grid grid-cols-3 h-12 bg-white">
-
-                {/* Active React Choice Tab ("Haha" matching reference background) */}
-                <button type="button" className="flex items-center justify-center gap-2 bg-[#E6F7FF] text-[#1890FF] font-bold text-[15px] cursor-pointer transition-colors border-r border-slate-50">
-                    <span className="text-lg">😆</span>
-                    <span>Haha</span>
-                </button>
+                <div className="flex items-center justify-center border-r border-slate-50 bg-[#E6F7FF]">
+                    <ReactionSelector />
+                </div>
 
                 {/* Comment Action Key Trigger Button */}
                 <button type="button" className="flex items-center justify-center gap-2 text-slate-500 hover:text-[#1890FF] font-semibold text-[15px] hover:bg-slate-50 transition-colors cursor-pointer border-r border-slate-50 group">

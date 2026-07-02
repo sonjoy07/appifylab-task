@@ -22,7 +22,21 @@ export default function Comment() {
             {/* 1. PRIMARY INPUT: WRITE A COMMENT BOX */}
             <div className="mb-5 flex items-center gap-3">
                 <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
-                    <img src="https://unsplash.com" alt="Current user" className="h-full w-full object-cover" />
+                    {/* <img src="https://unsplash.com" alt="Current user" className="h-full w-full object-cover" /> */}
+                    <svg
+                        xmlns="http://w3.org"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-full w-full bg-slate-100 text-slate-400 p-2"
+                    >
+                        <path d="M18 21a6 6 0 0 0-12 0" />
+                        <circle cx="12" cy="10" r="4" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
                 </div>
                 <div className="relative flex flex-grow items-center rounded-full bg-[#F0F2F5]/80 px-4 py-2.5">
                     <input
@@ -57,7 +71,21 @@ export default function Comment() {
             <div className="flex items-start gap-3">
                 {/* Commenter Avatar */}
                 <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-slate-100 mt-1">
-                    <img src={comment.avatarUrl} alt={comment.authorName} className="h-full w-full object-cover" />
+                    {/* <img src={comment.avatarUrl} alt={comment.authorName} className="h-full w-full object-cover" /> */}
+                    <svg
+                        xmlns="http://w3.org"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-full w-full bg-slate-100 text-slate-400 p-2"
+                    >
+                        <path d="M18 21a6 6 0 0 0-12 0" />
+                        <circle cx="12" cy="10" r="4" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
                 </div>
 
                 {/* Bubble Layout Area */}
@@ -97,7 +125,21 @@ export default function Comment() {
                     {/* 4. NESTED REPLY INPUT CAPSULE BOX */}
                     <div className="flex items-center gap-2.5 mt-1">
                         <div className="h-7 w-7 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
-                            <img src="https://unsplash.com" alt="Current user reply" className="h-full w-full object-cover" />
+                            {/* <img src="https://unsplash.com" alt="Current user reply" className="h-full w-full object-cover" /> */}
+                             <svg
+                            xmlns="http://w3.org"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-full w-full bg-slate-100 text-slate-400 p-2"
+                        >
+                            <path d="M18 21a6 6 0 0 0-12 0" />
+                            <circle cx="12" cy="10" r="4" />
+                            <circle cx="12" cy="12" r="10" />
+                        </svg>
                         </div>
                         <div className="relative flex flex-grow items-center rounded-full bg-[#F0F2F5]/80 px-4 py-2">
                             <input

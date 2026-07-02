@@ -1,6 +1,19 @@
+'use client';
 import Image from "next/image";
+import { JSX, useActionState, useEffect } from "react";
+import { registerAction } from "../actions/auth";
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
+    const router = useRouter();
+    const [state, formAction, isPending] = useActionState(registerAction, null);
+
+    useEffect(() => {
+        if (state?.success) {
+            router.push('/feed');
+        }
+    }, [state, router]);
+
     return (
         <div className="flex z-999 w-full flex-col justify-center px-10 ml-8 lg:w-1/3 lg:px-10 xl:px-10 bg-white">
             <div className="mx-auto w-full max-w-md">
@@ -41,7 +54,42 @@ export default function RegisterForm() {
                     <div className="flex-grow border border-slate-200"></div>
                 </div>
 
-                <form className="space-y-6">
+                {state?.error && (
+                    <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-500 border border-red-100">
+                        {state.error}
+                    </div>
+                )}
+                <form action={formAction} className="space-y-6">
+                    <div>
+                        <label htmlFor="firstname" className="block text-sm font-medium text-slate-700">
+                            First Name
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                id="firstname"
+                                name="firstName"
+                                type="text"
+                                autoComplete="given-name"
+                                required
+                                className="block w-full rounded-md border border-slate-100 px-3 py-4 text-slate-900  focus:border-blue-500 focus:outline-none focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+                            Last Name
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                id="lastname"
+                                name="lastName"
+                                type="text"
+                                autoComplete="family-name"
+                                required
+                                className="block w-full rounded-md border border-slate-100 px-3 py-4 text-slate-900  focus:border-blue-500 focus:outline-none focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            />
+                        </div>
+                    </div>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-slate-700">
                             Email
@@ -84,8 +132,8 @@ export default function RegisterForm() {
                         </div>
                         <div className="mt-1">
                             <input
-                                id="password"
-                                name="password"
+                                id="confirm_password"
+                                name="confirm_password"
                                 type="password"
                                 autoComplete="current-password"
                                 required

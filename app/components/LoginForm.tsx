@@ -1,6 +1,21 @@
+'use client'
 import Image from "next/image";
+import { JSX, useActionState, useEffect } from "react";
+import { loginAction } from "../actions/auth";
+import { useRouter } from "next/navigation";
+import Link from 'next/link'
 
-export default function LoginForm() {
+export default function LoginForm(): JSX.Element {
+    const router = useRouter();
+    const [state, formAction, isPending] = useActionState(loginAction, null);
+
+    useEffect(() => {
+        if (state?.success) {
+            router.push('/feed');
+            router.refresh();
+        }
+    }, [state, router]);
+
     return (
         <div className="flex z-999 w-full flex-col justify-center px-10 ml-8 lg:w-1/3 lg:px-10 xl:px-10 bg-white">
             <div className="mx-auto w-full max-w-md">
@@ -40,8 +55,12 @@ export default function LoginForm() {
                     </span>
                     <div className="flex-grow border border-slate-200"></div>
                 </div>
-
-                <form className="space-y-6">
+                {state?.error && (
+                    <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-500 border border-red-100">
+                        {state.error}
+                    </div>
+                )}
+                <form action={formAction} className="space-y-6">
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-slate-700">
                             Email
@@ -53,6 +72,7 @@ export default function LoginForm() {
                                 type="email"
                                 autoComplete="email"
                                 required
+                                disabled={isPending}
                                 className="block w-full rounded-md border border-slate-100 px-3 py-4 text-slate-900  focus:border-blue-500 focus:outline-none focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             />
                         </div>
@@ -69,6 +89,7 @@ export default function LoginForm() {
                                 id="password"
                                 name="password"
                                 type="password"
+                                disabled={isPending}
                                 autoComplete="current-password"
                                 required
                                 className="block w-full rounded-md border border-slate-100 px-3 py-4 text-slate-900  focus:border-blue-500 focus:outline-none focus:ring-0 focus:ring-blue-500 sm:text-sm"
@@ -98,20 +119,21 @@ export default function LoginForm() {
                     <div>
                         <button
                             type="submit"
+                            disabled={isPending}
                             className="flex w-full justify-center rounded-md bg-[#1890FF] px-4 py-3 text-md cursor-pointer font-semibold text-white shadow-sm hover:bg-[#1890FF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890FF] transition"
                         >
-                            Login now
+                            {isPending ? 'Signing in...' : 'Login now'}
                         </button>
                     </div>
                     <div className="mb-2 pb-10">
                         <p className="mt-20 text-md text-slate-600">
                             Dont have an account?{' '}
-                            <a
-                                href="#"
+                            <Link
+                                href="/register"
                                 className="font-medium text-[#1890FF] hover:text-[#0073e6] transition-colors duration-200"
                             >
                                 Create New Account
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </form>
