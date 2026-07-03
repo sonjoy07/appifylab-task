@@ -2,25 +2,15 @@
 import ReactTimeAgo from 'react-time-ago';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
+import CommentReactionSelector from './CommentReactionSelector';
+import type { CommentResponse } from '@/app/lib/types';
+import { apiFetch } from '@/app/lib/api-client';
 
 TimeAgo.addDefaultLocale(en);
 
-interface CommentData {
-    id: string;
-    text: string;
-    createdAt: string;
-    likesCount?: number;
-    currentUserReaction?: string | null;
-    user: {
-        firstName: string;
-        lastName: string;
-    };
-    replies?: CommentData[];
-}
-
 interface CommentProps {
     postId: string;
-    comment: CommentData;
+    comment: CommentResponse;
     showPreviousCommentsButton?: boolean;
     previousCommentsCount?: number;
     onShowPrevious?: () => void;
@@ -39,32 +29,16 @@ export default function Comment({
     const [showAllReplies, setShowAllReplies] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [isReplySubmitting, setIsReplySubmitting] = useState(false);
-    const [replies, setReplies] = useState<CommentData[]>(comment.replies ?? []);
-    const [likesCount, setLikesCount] = useState(comment.likesCount ?? 0);
-    const [liked, setLiked] = useState(comment.currentUserReaction === 'like');
-    const [isLiking, setIsLiking] = useState(false);
-    const [replyLikeCounts, setReplyLikeCounts] = useState<{ [key: string]: number }>({});
-    const [replyLiked, setReplyLiked] = useState<{ [key: string]: boolean }>({});
-    const [replyLiking, setReplyLiking] = useState<{ [key: string]: boolean }>({});
+    const [replies, setReplies] = useState<CommentResponse[]>(comment.replies ?? []);
+    const [commentData, setCommentData] = useState<CommentResponse>(comment);
 
     useEffect(() => {
         if ((comment.replies?.length ?? 0) > 0) {
             setReplies(comment.replies ?? []);
             setReplying(true);
         }
-
-        setLikesCount(comment.likesCount ?? 0);
-        setLiked(comment.currentUserReaction === 'like');
-
-        const counts: { [key: string]: number } = {};
-        const likedMap: { [key: string]: boolean } = {};
-        (comment.replies ?? []).forEach((reply) => {
-            counts[reply.id] = reply.likesCount ?? 0;
-            likedMap[reply.id] = reply.currentUserReaction === 'like';
-        });
-        setReplyLikeCounts(counts);
-        setReplyLiked(likedMap);
-    }, [comment.replies, comment.likesCount, comment.currentUserReaction]);
+        setCommentData(comment);
+    }, [comment]);
 
     const handleReplySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -72,7 +46,7 @@ export default function Comment({
         setIsReplySubmitting(true);
 
         try {
-            const response = await fetch(`/api/comments/reply`, {
+            const response = await apiFetch(`/api/comments/reply`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -86,7 +60,12 @@ export default function Comment({
 
             const data = await response.json();
             if (response.ok) {
-                setReplies((prev) => [...prev, data]);
+                const newReply: CommentResponse = {
+                    ...data,
+                    reactionsCount: { total: 0, breakdown: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 } },
+                    currentUserReaction: null,
+                };
+                setReplies((prev) => [...prev, newReply]);
                 setReplyText('');
                 setReplying(true);
             } else {
@@ -99,76 +78,47 @@ export default function Comment({
         }
     };
 
-    const handleLikeClick = async () => {
-        if (isLiking) return;
-        setIsLiking(true);
+    const handleCommentReact = (reactionType: string | null) => {
+        setCommentData((prev) => {
+            const prevCount = prev.reactionsCount?.total ?? 0;
+            const prevReaction = prev.currentUserReaction;
+            let delta = 0;
+            if (prevReaction && !reactionType) delta = -1;
+            else if (!prevReaction && reactionType) delta = 1;
+            const newTotal = Math.max(0, prevCount + delta);
 
-        try {
-            const response = await fetch(`/api/comments/${comment.id}/reactions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            return {
+                ...prev,
+                currentUserReaction: reactionType ?? null,
+                reactionsCount: {
+                    total: newTotal,
+                    breakdown: prev.reactionsCount?.breakdown ?? { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
                 },
-                body: JSON.stringify({ type: 'like' }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                if (data.status === 'removed') {
-                    setLiked(false);
-                    setLikesCount((count) => Math.max(0, count - 1));
-                } else if (data.status === 'added') {
-                    setLiked(true);
-                    setLikesCount((count) => count + 1);
-                } else if (data.status === 'updated') {
-                    setLiked(true);
-                    setLikesCount((count) => count + 1);
-                }
-            } else if (response.status === 403) {
-                // user attempted to react to their own comment
-                alert(data.message || 'Action not allowed.');
-            } else {
-                console.error('Like request failed:', data);
-            }
-        } catch (error) {
-            console.error('Like request failed:', error);
-        } finally {
-            setIsLiking(false);
-        }
+            };
+        });
     };
 
-    const handleReplyLikeClick = async (replyId: string) => {
-        if (replyLiking[replyId]) return;
-        setReplyLiking((prev) => ({ ...prev, [replyId]: true }));
+    const handleReplyReact = (replyId: string, reactionType: string | null) => {
+        setReplies((prev) =>
+            prev.map((r) => {
+                if (r.id !== replyId) return r;
+                const prevCount = r.reactionsCount?.total ?? 0;
+                const prevReaction = r.currentUserReaction;
+                let delta = 0;
+                if (prevReaction && !reactionType) delta = -1;
+                else if (!prevReaction && reactionType) delta = 1;
+                const newTotal = Math.max(0, prevCount + delta);
 
-        try {
-            const response = await fetch(`/api/comments/${replyId}/reactions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ type: 'like' }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                if (data.status === 'removed') {
-                    setReplyLiked((prev) => ({ ...prev, [replyId]: false }));
-                    setReplyLikeCounts((prev) => ({ ...prev, [replyId]: Math.max(0, (prev[replyId] ?? 0) - 1) }));
-                } else {
-                    setReplyLiked((prev) => ({ ...prev, [replyId]: true }));
-                    setReplyLikeCounts((prev) => ({ ...prev, [replyId]: (prev[replyId] ?? 0) + 1 }));
-                }
-            } else if (response.status === 403) {
-                alert(data.message || 'Action not allowed.');
-            } else {
-                console.error('Reply like request failed:', data);
-            }
-        } catch (error) {
-            console.error('Reply like request failed:', error);
-        } finally {
-            setReplyLiking((prev) => ({ ...prev, [replyId]: false }));
-        }
+                return {
+                    ...r,
+                    currentUserReaction: reactionType ?? null,
+                    reactionsCount: {
+                        total: newTotal,
+                        breakdown: r.reactionsCount?.breakdown ?? { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+                    },
+                };
+            })
+        );
     };
 
     const hiddenRepliesCount = Math.max(0, replies.length - 1);
@@ -214,28 +164,23 @@ export default function Comment({
                             {comment.text}
                         </p>
 
-                        {/* Floating Like Counts overlapping box structure */}
-                        <div className="absolute -bottom-3 right-4 z-10 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 shadow-sm border border-slate-100 select-none">
-                            <div className="flex items-center -space-x-0.5">
-                                <span className="text-[11px] bg-blue-500 rounded-full w-3.5 h-3.5 flex items-center justify-center text-white scale-90">👍</span>
-                                <span className="text-[11px] bg-red-500 rounded-full w-3.5 h-3.5 flex items-center justify-center text-white scale-90">❤️</span>
+                        {(commentData.reactionsCount?.total ?? 0) > 0 && (
+                            <div className="absolute -bottom-3 right-4 z-10 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 shadow-sm border border-slate-100 select-none">
+                                <span className="text-[11px] bg-blue-500 rounded-full w-3.5 h-3.5 flex items-center justify-center text-white">👍</span>
+                                <span className="text-[12px] font-bold text-slate-700 tracking-wide mt-0.5">
+                                    {commentData.reactionsCount?.total}
+                                </span>
                             </div>
-                            <span className="text-[12px] font-bold text-slate-700 tracking-wide mt-0.5">
-                                {likesCount}
-                            </span>
-                        </div>
+                        )}
                     </div>
 
-                    {/* Sub-interaction Row Links */}
                     <div className="mt-2 mb-4 flex items-center gap-2 pl-3 text-[13px] font-bold text-slate-700 select-none">
-                        <button
-                            type="button"
-                            onClick={handleLikeClick}
-                            disabled={isLiking}
-                            className={`rounded-full px-2 py-1 transition cursor-pointer ${liked ? 'bg-[#E6F7FF] text-[#1890FF]' : 'text-slate-700 hover:text-[#1890FF]'}`}
-                        >
-                            {liked ? 'Liked' : 'Like'}
-                        </button>
+                        <CommentReactionSelector
+                            commentId={comment.id}
+                            initialReaction={commentData.currentUserReaction}
+                            disabled={false}
+                            onReact={handleCommentReact}
+                        />
                         <span className="text-slate-400 font-normal">.</span>
                         <button
                             type="button"
@@ -296,49 +241,45 @@ export default function Comment({
                                             .join(' ') || 'Unknown User';
 
                                         return (
-                                            <div className='flex flex-grow flex-col'><div key={reply.id} className="ml-11 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm">
-                                                <div className="flex items-start gap-3">
-                                                    <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="1.5"
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            className="h-full w-full bg-slate-100 text-slate-400 p-2"
-                                                        >
-                                                            <path d="M18 21a6 6 0 0 0-12 0" />
-                                                            <circle cx="12" cy="10" r="4" />
-                                                            <circle cx="12" cy="12" r="10" />
-                                                        </svg>
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center justify-between gap-3">
-                                                            <p className="font-semibold text-slate-900">{replyAuthor}</p>
-                                                            <span className="text-xs text-slate-400">
-                                                                <ReactTimeAgo date={new Date(reply.createdAt)} locale="bn" />
-                                                            </span>
+                                            <div key={reply.id} className='flex flex-grow flex-col'>
+                                                <div className="ml-11 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth="1.5"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                className="h-full w-full bg-slate-100 text-slate-400 p-2"
+                                                            >
+                                                                <path d="M18 21a6 6 0 0 0-12 0" />
+                                                                <circle cx="12" cy="10" r="4" />
+                                                                <circle cx="12" cy="12" r="10" />
+                                                            </svg>
                                                         </div>
-                                                        <p className="mt-2 text-slate-600">{reply.text}</p>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <p className="font-semibold text-slate-900">{replyAuthor}</p>
+                                                                <span className="text-xs text-slate-400">
+                                                                    <ReactTimeAgo date={new Date(reply.createdAt)} locale="bn" />
+                                                                </span>
+                                                            </div>
+                                                            <p className="mt-2 text-slate-600">{reply.text}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                {/* </div> */}
-
-
-                                            </div>
                                                 <div className="mt-2 mb-4 flex items-center gap-2 pl-3 ml-8 text-[13px] font-bold text-slate-700 select-none">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleReplyLikeClick(reply.id)}
-                                                        disabled={replyLiking[reply.id]}
-                                                        className={`rounded-full px-2 py-1 transition cursor-pointer ${replyLiked[reply.id] ? 'bg-[#E6F7FF] text-[#1890FF]' : 'text-slate-700 hover:text-[#1890FF]'}`}
-                                                    >
-                                                        {replyLiked[reply.id] ? 'Liked' : 'Like'}
-                                                    </button>
-                                                    {(replyLikeCounts[reply.id] ?? 0) > 0 && (
-                                                        <span className="text-slate-500">{replyLikeCounts[reply.id]} like{(replyLikeCounts[reply.id] ?? 0) === 1 ? '' : 's'}</span>
+                                                    <CommentReactionSelector
+                                                        commentId={reply.id}
+                                                        initialReaction={reply.currentUserReaction}
+                                                        disabled={false}
+                                                        onReact={(type) => handleReplyReact(reply.id, type)}
+                                                    />
+                                                    {(reply.reactionsCount?.total ?? 0) > 0 && (
+                                                        <span className="text-slate-500">{reply.reactionsCount?.total} reaction{reply.reactionsCount?.total === 1 ? '' : 's'}</span>
                                                     )}
                                                     <span className="text-slate-400 font-normal ml-1">.</span>
                                                     <ReactTimeAgo className='text-slate-400' date={new Date(reply.createdAt)} locale="bn" />
@@ -351,26 +292,7 @@ export default function Comment({
                         </>
                     )}
                 </div>
-
-                {/* <div className="min-w-0 flex-1">
-
-                <p className="mt-4 text-sm leading-6 text-slate-700">
-                    {comment.text}
-                </p>
-
-                <div className="mt-4 flex flex-wrap items-center gap-4 text-[13px] font-semibold text-slate-500">
-                    <button type="button" className="hover:text-[#1890FF] transition-colors">
-                        Like
-                    </button>
-                    <button type="button" className="hover:text-[#1890FF] transition-colors">
-                        Reply
-                    </button>
-                    <button type="button" className="hover:text-[#1890FF] transition-colors">
-                        Share
-                    </button>
-                </div>
-            </div> */}
             </div>
-        </div >
+        </div>
     );
 }

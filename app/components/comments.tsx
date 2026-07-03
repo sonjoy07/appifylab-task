@@ -2,24 +2,15 @@
 
 import React, { FormEvent, useEffect, useState } from 'react';
 import Comment from './Comment';
-
-interface CommentData {
-  id: string;
-  text: string;
-  createdAt: string;
-  user: {
-    firstName: string;
-    lastName: string;
-  };
-  replies?: CommentData[];
-}
+import type { CommentResponse } from '@/app/lib/types';
+import { apiFetch } from '@/app/lib/api-client';
 
 interface CommentsProps {
   postId: string;
 }
 
 export default function Comments({ postId }: CommentsProps) {
-  const [comments, setComments] = useState<CommentData[]>([]);
+  const [comments, setComments] = useState<CommentResponse[]>([]);
   const [newCommentsCount, setNewCommentsCount] = useState(0);
   const [showAllComments, setShowAllComments] = useState(false);
   const [text, setText] = useState('');
@@ -29,7 +20,7 @@ export default function Comments({ postId }: CommentsProps) {
   useEffect(() => {
     const loadComments = async () => {
       try {
-        const response = await fetch(`/api/comments?postId=${postId}`);
+        const response = await apiFetch(`/api/comments?postId=${postId}`);
         const data = await response.json();
         setComments(Array.isArray(data) ? data : data.comments ?? []);
       } catch (error) {
@@ -52,7 +43,7 @@ export default function Comments({ postId }: CommentsProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/comments', {
+      const response = await apiFetch('/api/comments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +56,12 @@ export default function Comments({ postId }: CommentsProps) {
       if (!response.ok) {
         setFeedback(data.message || 'Failed to save comment.');
       } else {
-        setComments((prev) => [...prev, data]);
+        const newComment: CommentResponse = {
+          ...data,
+          reactionsCount: { total: 0, breakdown: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 } },
+          currentUserReaction: null,
+        };
+        setComments((prev) => [...prev, newComment]);
         setNewCommentsCount((count) => count + 1);
         setShowAllComments(true);
         setText('');

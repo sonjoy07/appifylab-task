@@ -1,14 +1,12 @@
 "use client"
 import React, { JSX, useEffect, useRef, useState } from 'react'
 import ReactionSelector from './ReactionSelector';
-import { PostResponse } from '@/app/actions/posts';
+import { PostResponse } from '@/app/lib/types';
 import ReactTimeAgo from "react-time-ago"
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 
-if (!TimeAgo.alreadyRegistered?.(en)) {
-  TimeAgo.addDefaultLocale(en);
-}
+TimeAgo.addDefaultLocale(en);
 
 interface PostData {
     authorName: string;
@@ -26,6 +24,7 @@ interface MenuOption {
     label: string;
     icon: JSX.Element;
     isDanger?: boolean;
+    action?: () => void;
 }
 
 export default function Post( {post}: {post: PostResponse}) {
@@ -131,7 +130,7 @@ export default function Post( {post}: {post: PostResponse}) {
                             {post.user?.firstName} {post.user?.lastName}
                         </span>
                         <span className="text-[13px] text-slate-400 font-medium mt-1">
-                            <ReactTimeAgo date={post.createdAt} locale="bn"/> . {post.privacy}
+                            <ReactTimeAgo date={new Date(post.createdAt)} locale="bn"/> . {post.privacy}
                         </span>
                     </div>
                 </div>
@@ -206,7 +205,7 @@ export default function Post( {post}: {post: PostResponse}) {
                 {/* Left Side: Overlapping Reactions Stack */}
                 <div className="flex items-center">
                     <div className="flex -space-x-2 overflow-hidden py-1">
-                        {post.reactionsUsers.map((url, idx) => (
+                        {(post.reactionsUsers ?? []).map((url, idx) => (
                             <svg
                                 key={idx}
                                 xmlns="http://w3.org"
@@ -225,8 +224,8 @@ export default function Post( {post}: {post: PostResponse}) {
                         ))}
                     </div>
                     {/* Reaction Extent Total Counter Badge */}
-                    {post.reactionsCount.total !== 0 &&<div className="ml-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#1890FF] text-[10px] font-bold text-white ring-2 ring-white select-none">
-                        {post.reactionsCount.total>9 ? `${post.reactionsCount.total}+`: post.reactionsCount.total}
+                    {post.reactionsCount?.total !== 0 &&<div className="ml-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#1890FF] text-[10px] font-bold text-white ring-2 ring-white select-none">
+                        {post.reactionsCount?.total>9 ? `${post.reactionsCount?.total}+`: post.reactionsCount?.total}
                     </div>}
                 </div>
 

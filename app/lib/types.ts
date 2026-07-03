@@ -3,11 +3,26 @@ export interface UserMeta {
   lastName: string;
 }
 
+export interface ReactionSummary {
+  total: number;
+  breakdown: {
+    like: number;
+    love: number;
+    haha: number;
+    wow: number;
+    sad: number;
+    angry: number;
+  };
+}
+
 export interface CommentResponse {
   id: string;
   text: string;
   createdAt: string;
+  userId?: string;
   user: UserMeta;
+  reactionsCount?: ReactionSummary;
+  currentUserReaction?: string | null;
   replies?: CommentResponse[];
 }
 

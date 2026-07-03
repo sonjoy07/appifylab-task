@@ -5,6 +5,7 @@ import { PostResponse } from '@/app/lib/types';
 import Post from './Post';
 import CreatePost from './CreatePost';
 import Comments from './Comments';
+import { apiFetch } from '@/app/lib/api-client';
 
 interface PostsClientProps {
   initialPosts: PostResponse[];
@@ -46,7 +47,7 @@ export default function PostsClient({ initialPosts, initialMeta }: PostsClientPr
     const fetchNextPage = async () => {
       setIsLoading(true);
 
-      const response = await fetch(`/api/feed?page=${page + 1}&limit=${meta.itemsPerPage}`);
+      const response = await apiFetch(`/api/feed?page=${page + 1}&limit=${meta.itemsPerPage}`);
       const result = await response.json();
 
       if (response.ok && result?.data) {
