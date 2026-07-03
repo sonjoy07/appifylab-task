@@ -125,7 +125,7 @@ export default function LeftSidebar() {
         attendeesCount: 17,
     };
     return (
-        <div className='flex flex-col'>
+        <div className='shrink-0 overflow-y-auto hide-scrollbar flex flex-col'>
             <aside className="w-full ml-20 mt-5 max-w-[280px] rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm">
                 {/* Sidebar Header Title */}
                 <h3 className="mb-5 text-lg font-bold tracking-tight text-slate-800">

@@ -181,10 +181,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#F4F7FC] p-3">
+        <div className="flex items-center justify-between gap-1 rounded-xl bg-[#F4F7FC] p-3">
 
 
-          <div className="flex items-center gap-1 sm:gap-4 flex-wrap">
+          <div className="flex items-center gap-1 sm:gap-2 flex-1">
 
             <button
               type="button"

@@ -99,7 +99,7 @@ export default function RightSidebar() {
         friend.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     return (
-        <div className='flex flex-col ml-5 mt-5 mr-25'>
+        <div className='overflow-y-auto hide-scrollbar flex flex-col ml-5 mt-5 mr-20'>
             <div className="w-full max-w-[340px] rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm">
 
                 {/* 1. HEADER SECTION */}

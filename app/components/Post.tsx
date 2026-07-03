@@ -147,7 +147,6 @@ export default function Post( {post}: {post: PostResponse}) {
                         </svg>
                     </button>
 
-                    {/* ABSOLUTE OPTIONS DROPDOWN COMPONENT */}
                     {isMenuOpen && (
                         <div className="absolute right-0 top-8 z-50 w-[260px] rounded-2xl border border-slate-100 bg-white p-3 font-sans shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
                             <div className="flex flex-col gap-0.5">
