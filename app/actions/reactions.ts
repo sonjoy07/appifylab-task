@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
-const EXTERNAL_API_URL = process.env.EXTERNAL_API_URL || "http://localhost:4000";
+const NEXT_EXTERNAL_API_URL = process.env.NEXT_EXTERNAL_API_URL || "http://localhost:4000";
 
 export interface ReactionActionResponse {
   success: boolean;
@@ -24,13 +24,14 @@ export async function toggleReactionAction(
     }
 
     // 1. Submit the payload to your external API backend
-    const response = await fetch(`${EXTERNAL_API_URL}/posts/${postId}/reactions`, {
+    const normalizedType = reactionType.toLowerCase();
+    const response = await fetch(`${NEXT_EXTERNAL_API_URL}/posts/${postId}/reactions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,
       },
-      body: JSON.stringify({ type: reactionType }),
+      body: JSON.stringify({ type: normalizedType }),
     });
 
     const data = await response.json();
@@ -45,7 +46,7 @@ export async function toggleReactionAction(
     }
 
     // 3. Purge cached layouts to display the new updated count values instantly
-    revalidatePath('/dashboard');
+    revalidatePath('/feed');
     return { success: true, message: "Reaction updated successfully!" };
 
   } catch (error) {

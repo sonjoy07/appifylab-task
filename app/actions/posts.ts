@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 
-const EXTERNAL_API_URL = process.env.EXTERNAL_API_URL || "http://localhost:4000";
+const NEXT_EXTERNAL_API_URL = process.env.NEXT_EXTERNAL_API_URL || "http://localhost:4000";
 
 export interface PostResponse {
   id: string;
@@ -30,7 +30,7 @@ export async function getPostsAction(): Promise<PostResponse[]> {
     const token = cookieStore.get("session_token")?.value;
 
     // Fetch from your external backend url
-    const response = await fetch(`${EXTERNAL_API_URL}/posts`, {
+    const response = await fetch(`${NEXT_EXTERNAL_API_URL}/posts`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export async function createPostAction(prevState: any, formData: FormData) {
     }
 
     
-    const response = await fetch(`${EXTERNAL_API_URL}/posts`, {
+    const response = await fetch(`${NEXT_EXTERNAL_API_URL}/posts`, {
       method: "POST",
       headers: {
         ...(token ? { "Authorization": `Bearer ${token}` } : {}),
