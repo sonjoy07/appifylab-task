@@ -1,10 +1,11 @@
 'use client'
 import Image from 'next/image'
 import React, { JSX, useState, useEffect, useRef } from 'react'
-import { logoutAction } from '@/app/actions/auth';
+import { logoutAction, getProfileAction } from '@/app/actions/auth';
 
 export default function Header() {
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+    const [userName, setUserName] = useState<string>('');
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown automatically if user clicks anywhere outside of it
@@ -16,6 +17,12 @@ export default function Header() {
         }
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        getProfileAction().then((user) => {
+            if (user) setUserName(`${user.firstName} ${user.lastName}`);
+        });
     }, []);
     return (
         <header className="sticky px-25 py-10 top-0 z-50 flex h-16 w-full items-center justify-between border-b border-slate-100 bg-white">
@@ -141,7 +148,7 @@ export default function Header() {
                         </svg>
                     </div>
                     <span className="hidden text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors md:block">
-                        Dylan Field
+                        {userName || 'User'}
                     </span>
                     {/* Small Chevron Down Vector Arrow */}
                     <svg className="h-3 w-3 text-slate-400 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
@@ -149,23 +156,56 @@ export default function Header() {
                     </svg>
                 </div>
                 {isDropdownOpen && (
-                    <div className="absolute right-0 top-12 z-50 w-[240px] rounded-2xl border border-slate-100 bg-white p-2 font-sans shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
-                        <div className="flex flex-col gap-0.5">
+                    <div className="absolute right-0 top-14 z-50 w-[280px] rounded-xl border border-slate-200 bg-white font-sans shadow-lg animate-in fade-in slide-in-from-top-2 duration-150 overflow-hidden">
+                        {/* User Info Card */}
+                        <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100">
+                            <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                                {(userName || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-semibold text-slate-800 truncate">{userName || 'User'}</span>
+                                <span className="text-xs text-slate-400 truncate">View your profile</span>
+                            </div>
+                        </div>
 
+                        <div className="p-1.5">
                             {/* Profile Link Option */}
-                            <button type="button" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
-                                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                <span>My Profile</span>
+                            <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer">
+                                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-slate-700">My Profile</span>
+                                    <span className="text-xs text-slate-400">Manage your personal info</span>
+                                </div>
                             </button>
 
                             {/* Account Settings Option */}
-                            <button type="button" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer">
-                                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span>Settings</span>
+                            <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer">
+                                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-slate-700">Settings</span>
+                                    <span className="text-xs text-slate-400">Account & privacy settings</span>
+                                </div>
+                            </button>
+
+                            {/* Help & Support */}
+                            <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer">
+                                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                                    </svg>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-slate-700">Help & Support</span>
+                                    <span className="text-xs text-slate-400">Get help and report issues</span>
+                                </div>
                             </button>
 
                             {/* Thin Partition Splitter Line */}
@@ -174,10 +214,10 @@ export default function Header() {
                             <form action={logoutAction} className="w-full">
                                 <button
                                     type="submit"
-                                    className="group/logout flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                                    className="group/logout flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-500 hover:bg-red-50 transition-all cursor-pointer"
                                 >
                                     {/* Logout Icon with matching hover red fill */}
-                                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500 group-hover/logout:bg-red-500 group-hover/logout:text-white transition-colors">
+                                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500 group-hover/logout:bg-red-500 group-hover/logout:text-white transition-colors">
                                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
@@ -185,7 +225,6 @@ export default function Header() {
                                     <span className="mt-0.5">Log Out</span>
                                 </button>
                             </form>
-
                         </div>
                     </div>
                 )}

@@ -13,6 +13,7 @@ interface ReactionSelectorProps {
     postId: string;
     initialReaction?: string;
     disabled?: boolean;
+    onReactionChange?: (newReaction: string | null, oldReaction: string | null) => void;
 }
 
 const reactionList: ReactionType[] = [
@@ -31,7 +32,7 @@ const normalizeReaction = (reaction?: string): string => {
     return match?.name ?? 'Like';
 };
 
-export default function ReactionSelector({ postId, initialReaction = 'Like', disabled = false }: ReactionSelectorProps) {
+export default function ReactionSelector({ postId, initialReaction = 'Like', disabled = false, onReactionChange }: ReactionSelectorProps) {
     const [currentReaction, setCurrentReaction] = useState(normalizeReaction(initialReaction));
     const [isHovered, setIsHovered] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,12 +50,21 @@ export default function ReactionSelector({ postId, initialReaction = 'Like', dis
         setErrorMessage(null);
 
         const previousReaction = currentReaction;
-        setCurrentReaction(type);
+        const isTogglingOff = type === previousReaction;
+
+        if (isTogglingOff) {
+            setCurrentReaction('Like');
+            onReactionChange?.(null, previousReaction);
+        } else {
+            setCurrentReaction(type);
+            onReactionChange?.(type, previousReaction);
+        }
 
         startTransition(async () => {
             const result = await toggleReactionAction(postId, type);
             if (!result.success) {
                 setCurrentReaction(previousReaction);
+                onReactionChange?.(previousReaction, isTogglingOff ? 'Like' : type);
                 setErrorMessage(result.error || 'Action not allowed.');
                 setTimeout(() => setErrorMessage(null), 3000);
             }

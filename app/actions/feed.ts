@@ -58,6 +58,10 @@ export async function createPostAction(prevState: any, formData: FormData) {
     return { error: 'Cannot submit an empty post. Provide text or an image.' };
   }
 
+  if (attachedFile && attachedFile.size > 10 * 1024 * 1024) {
+    return { error: `File too large (${(attachedFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 10MB.` };
+  }
+
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('session_token')?.value;

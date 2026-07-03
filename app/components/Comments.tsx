@@ -11,7 +11,6 @@ interface CommentsProps {
 
 export default function Comments({ postId }: CommentsProps) {
   const [comments, setComments] = useState<CommentResponse[]>([]);
-  const [newCommentsCount, setNewCommentsCount] = useState(0);
   const [showAllComments, setShowAllComments] = useState(false);
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,6 +28,7 @@ export default function Comments({ postId }: CommentsProps) {
     };
 
     loadComments();
+    setShowAllComments(false);
   }, [postId]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -62,8 +62,6 @@ export default function Comments({ postId }: CommentsProps) {
           currentUserReaction: null,
         };
         setComments((prev) => [...prev, newComment]);
-        setNewCommentsCount((count) => count + 1);
-        setShowAllComments(true);
         setText('');
         setFeedback('Comment posted successfully.');
       }

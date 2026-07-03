@@ -27,11 +27,16 @@ interface MenuOption {
     action?: () => void;
 }
 
-export default function Post( {post}: {post: PostResponse}) {
+export default function Post( {post, onReactionChange}: {post: PostResponse, onReactionChange?: (newReaction: string | null, oldReaction: string | null) => void}) {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
-    const apiUrl = process.env.NEXT_EXTERNAL_API_URL || 'http://localhost:4000';
-    console.log('post',post)
+    const apiUrl = process.env.NEXT_PUBLIC_EXTERNAL_API_URL || process.env.NEXT_EXTERNAL_API_URL || 'http://localhost:4000';
+
+    const imageUrl = post.mediaImageUrl
+      ? (post.mediaImageUrl.startsWith('http://') || post.mediaImageUrl.startsWith('https://')
+        ? post.mediaImageUrl
+        : `${apiUrl}${post.mediaImageUrl}`)
+      : null;
     //  post = {
     //     timeAgo: '5 minute ago',
     //     privacy: 'Public',
@@ -188,10 +193,10 @@ export default function Post( {post}: {post: PostResponse}) {
             </div>
 
             
-            {post.mediaImageUrl && <div className="w-full px-5 mb-4">
+            {imageUrl && <div className="w-full px-5 mb-4">
                 <div className="overflow-hidden rounded-xl border border-slate-100/50 max-h-[420px] flex items-center justify-center bg-slate-50">
                     <img
-                        src={`${apiUrl}${post.mediaImageUrl}`}
+                        src={imageUrl}
                         alt="Post content visualization"
                         className="w-full h-auto object-cover"
                     />
@@ -243,6 +248,7 @@ export default function Post( {post}: {post: PostResponse}) {
                       postId={post.id}
                       initialReaction={post.currentUserReaction ?? 'Like'}
                       disabled={post.isOwner ?? false}
+                      onReactionChange={onReactionChange}
                     />
                 </div>
 

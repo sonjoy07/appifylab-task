@@ -91,7 +91,7 @@ export default function Story() {
             {/* 3. ABSOLUTE FLOATING NEXT/ARROW NAVIGATION LINK BUTTON */}
             <button
                 type="button"
-                className="absolute -right-3 top-1/2 -translate-y-1/2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-[#1890FF] text-white shadow-md hover:bg-[#0050B3] transition-colors cursor-pointer border border-transparent"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-[#1890FF] text-white shadow-md hover:bg-[#0050B3] transition-colors cursor-pointer border border-transparent"
             >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

@@ -113,3 +113,21 @@ export async function logoutAction() {
 
   redirect('/login');
 }
+
+export async function getProfileAction() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    if (!token) return null;
+
+    const response = await fetch(`${NEXT_EXTERNAL_API_URL}/auth/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}

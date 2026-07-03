@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-   async redirects() {
+   experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
+  },
+  async redirects() {
     return [
       {
         source: '/',           

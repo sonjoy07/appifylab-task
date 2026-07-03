@@ -242,7 +242,7 @@ export default function Comment({
 
                                         return (
                                             <div key={reply.id} className='flex flex-grow flex-col'>
-                                                <div className="ml-11 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm">
+                                                <div className="ml-11 rounded-2xl bg-[#F0F2F5]/70 px-4 py-3 text-sm">
                                                     <div className="flex items-start gap-3">
                                                         <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
                                                             <svg
@@ -263,9 +263,9 @@ export default function Comment({
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between gap-3">
                                                                 <p className="font-semibold text-slate-900">{replyAuthor}</p>
-                                                                <span className="text-xs text-slate-400">
+                                                                {/* <span className="text-xs text-slate-400">
                                                                     <ReactTimeAgo date={new Date(reply.createdAt)} locale="bn" />
-                                                                </span>
+                                                                </span> */}
                                                             </div>
                                                             <p className="mt-2 text-slate-600">{reply.text}</p>
                                                         </div>

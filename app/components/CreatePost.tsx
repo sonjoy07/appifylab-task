@@ -11,6 +11,8 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
   const [postText, setPostText] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +59,13 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
+    setFileError(null);
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        setFileError(`File too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 10MB.`);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
       setSelectedImage(file);
 
       // Generate a temporary browser RAM string URL to display the image preview
@@ -97,10 +105,15 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
         </div>
       )}
        {state?.success && state?.message && (
-        <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm font-semibold text-green-600 border border-green-100 animate-in fade-in duration-200">
-          {state.message}
-        </div>
-      )}
+         <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm font-semibold text-green-600 border border-green-100 animate-in fade-in duration-200">
+           {state.message}
+         </div>
+       )}
+       {fileError && (
+         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-500 border border-red-100 animate-in fade-in duration-200">
+           {fileError}
+         </div>
+       )}
       <form action={formAction}>
         <input
           type="file"

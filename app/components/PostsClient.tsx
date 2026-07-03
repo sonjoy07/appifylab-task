@@ -65,6 +65,50 @@ export default function PostsClient({ initialPosts, initialMeta }: PostsClientPr
     fetchNextPage();
   }, [isFetchingMore, page, meta.itemsPerPage]);
 
+  const handleReactionChange = (postId: string, newReaction: string | null, oldReaction: string | null) => {
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+
+        const newBreakdown = {
+          like: 0,
+          love: 0,
+          haha: 0,
+          wow: 0,
+          sad: 0,
+          angry: 0,
+          ...post.reactionsCount.breakdown,
+        };
+        let newTotal = post.reactionsCount.total;
+        let newReactionsUsers = [...(post.reactionsUsers ?? [])];
+
+        if (oldReaction && oldReaction.toLowerCase() !== 'none') {
+          const key = oldReaction.toLowerCase() as keyof typeof newBreakdown;
+          if (newBreakdown[key] !== undefined) newBreakdown[key] = Math.max(0, newBreakdown[key] - 1);
+          newTotal = Math.max(0, newTotal - 1);
+          newReactionsUsers = newReactionsUsers.slice(1);
+        }
+
+        if (newReaction && newReaction.toLowerCase() !== 'none') {
+          const key = newReaction.toLowerCase() as keyof typeof newBreakdown;
+          if (newBreakdown[key] !== undefined) newBreakdown[key] += 1;
+          newTotal += 1;
+          newReactionsUsers = [
+            { id: '', email: '', firstName: '', type: newReaction },
+            ...newReactionsUsers,
+          ];
+        }
+
+        return {
+          ...post,
+          currentUserReaction: newReaction && newReaction.toLowerCase() !== 'none' ? newReaction : null,
+          reactionsCount: { total: newTotal, breakdown: newBreakdown },
+          reactionsUsers: newReactionsUsers,
+        };
+      })
+    );
+  };
+
   const handleAddPost = (newPost: PostResponse) => {
     setPosts((prev) => [newPost, ...prev]);
   };
@@ -74,7 +118,7 @@ export default function PostsClient({ initialPosts, initialMeta }: PostsClientPr
       <CreatePost onPostCreated={handleAddPost} />
       {posts.map((post) => (
         <div key={post.id}>
-          <Post post={post} />
+          <Post post={post} onReactionChange={(newR, oldR) => handleReactionChange(post.id, newR, oldR)} />
           <Comments postId={post.id} />
         </div>
       ))}
