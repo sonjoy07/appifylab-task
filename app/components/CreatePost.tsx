@@ -19,21 +19,19 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
   const [fileError, setFileError] = useState<string | null>(null);
   const [privacy, setPrivacy] = useState('public');
   const [showPrivacyDropdown, setShowPrivacyDropdown] = useState(false);
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
   const privacyRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [state, formAction, isPending] = useActionState(createPostAction, null);
   const createdPostIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
     if (!state) return;
-
-    if (!state?.success) {
-      createdPostIdRef.current = null;
-    }
 
     if (state.success) {
       setPostText('');
@@ -43,6 +41,8 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
       if (fileInputRef.current) fileInputRef.current.value = '';
 
+      setToast({ type: 'success', text: state.message || 'Post created!' });
+
       const createdPost = state.createdPost as PostResponse | undefined;
       const createdPostId = createdPost?.id;
 
@@ -50,8 +50,27 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
         onPostCreated(createdPost);
         createdPostIdRef.current = createdPostId;
       }
+    } else if (state.error) {
+      setToast({ type: 'error', text: state.error });
     }
   }, [state, imagePreview, onPostCreated]);
+
+  useEffect(() => {
+    if (toast) {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => setToast(null), 3000);
+    }
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, [toast]);
+
+  useEffect(() => {
+    if (fileError) {
+      setToast({ type: 'error', text: fileError });
+      setFileError(null);
+    }
+  }, [fileError]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -68,9 +87,9 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
     setPostText(val);
 
     if (textareaRef.current) {
-      // Reset height instantly to recalculate scroll heights properly
+      
       textareaRef.current.style.height = 'auto';
-      // Set to current inner text container size bounds (up to a max of 250px)
+     
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 250)}px`;
     }
   };
@@ -86,7 +105,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
       }
       setSelectedImage(file);
 
-      // Generate a temporary browser RAM string URL to display the image preview
+     
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
     }
@@ -94,12 +113,12 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
 
   const removeSelectedImage = (): void => {
     if (imagePreview) {
-      URL.revokeObjectURL(imagePreview); // Clean memory block caches
+      URL.revokeObjectURL(imagePreview);
     }
     setSelectedImage(null);
     setImagePreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''; // Reset core HTML file link nodes
+      fileInputRef.current.value = '';
     }
   };
 
@@ -110,28 +129,18 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
       attachedFile: selectedImage
     });
 
-    // Reset layout fields cleanly on success
+    
     setPostText('');
     removeSelectedImage();
   };
 
   return (
     <div className="w-full mt-5 max-w-[620px] rounded-2xl border border-slate-100 bg-white p-5 font-sans shadow-sm">
-       {state?.error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-500 border border-red-100 animate-in fade-in duration-200">
-          {state.error}
+      {toast && (
+        <div className={`mb-4 rounded-lg p-3 text-sm font-semibold border animate-in fade-in slide-in-from-top-2 duration-200 ${toast.type === 'success' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-500 border-red-100'}`}>
+          {toast.text}
         </div>
       )}
-       {state?.success && state?.message && (
-         <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm font-semibold text-green-600 border border-green-100 animate-in fade-in duration-200">
-           {state.message}
-         </div>
-       )}
-       {fileError && (
-         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-500 border border-red-100 animate-in fade-in duration-200">
-           {fileError}
-         </div>
-       )}
       <form action={formAction}>
         <input
           type="file"
@@ -142,9 +151,9 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
           className="hidden"
         />
 
-        {/* 1. TOP WRITER TEXTAREA ROW CONTAINER */}
+        
         <div className="flex items-start gap-3.5 mb-6">
-          {/* User Profile Avatar Frame */}
+          
           <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-amber-100 border border-slate-50">
             {/* <img
             src="https://unsplash.com"
@@ -167,7 +176,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
             </svg>
           </div>
 
-          {/* Dynamic Expanding Text Area Input */}
+         
           <div className="relative flex-grow pt-1">
             <textarea
               ref={textareaRef}
@@ -180,7 +189,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
               style={{ minHeight: '32px' }}
             />
 
-            {/* Small Decorative Edit Pencil Icon */}
+           
             {postText.length === 0 && (
               <div className="absolute right-2 top-2 pointer-events-none text-slate-400">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -198,7 +207,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
               alt="Upload validation display layout"
               className="w-full h-auto object-cover"
             />
-            {/* Absolute Circular X Clear Button Upper Top Right */}
+            
             <button
               type="button"
               onClick={removeSelectedImage}
@@ -283,15 +292,21 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
 
           <button
             type="submit"
-            disabled={postText.trim().length === 0}
-            className={`flex items-center gap-2 rounded-xl bg-[#1890FF] px-6 py-2.5 text-base font-bold text-white shadow-sm hover:bg-[#0050B3] transition-all cursor-pointer ${postText.trim().length === 0 ? 'opacity-70 cursor-not-allowed' : ''
+            disabled={postText.trim().length === 0 || isPending}
+            className={`flex items-center gap-2 rounded-xl bg-[#1890FF] px-6 py-2.5 text-base font-bold text-white shadow-sm hover:bg-[#0050B3] transition-all cursor-pointer ${postText.trim().length === 0 || isPending ? 'opacity-70 cursor-not-allowed' : ''
               }`}
           >
-            {/* Paper Airplane Send SVG Icon */}
-            <svg className="h-4 w-4 transform rotate-45 -mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-            <span>Post</span>
+            {isPending ? (
+              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="h-4 w-4 transform rotate-45 -mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            )}
+            <span>{isPending ? 'Posting...' : 'Post'}</span>
           </button>
 
         </div>

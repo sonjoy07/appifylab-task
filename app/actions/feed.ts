@@ -89,7 +89,8 @@ export async function createPostAction(prevState: any, formData: FormData) {
     apiPayload.append('privacy', privacy || 'public');
 
     if (attachedFile && attachedFile.size > 0) {
-      apiPayload.append('image', attachedFile);
+      const buffer = await attachedFile.arrayBuffer();
+      apiPayload.append('image', new Blob([buffer], { type: attachedFile.type }), attachedFile.name);
     }
 
     const response = await fetch(`${NEXT_EXTERNAL_API_URL}/posts`, {
