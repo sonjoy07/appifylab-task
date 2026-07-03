@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState, useRef } from 'react';
 import ReactTimeAgo from 'react-time-ago';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
@@ -32,6 +32,8 @@ export default function Comment({
     const [isReplySubmitting, setIsReplySubmitting] = useState(false);
     const [replies, setReplies] = useState<CommentResponse[]>(comment.replies ?? []);
     const [commentData, setCommentData] = useState<CommentResponse>(comment);
+    const [hoverBadge, setHoverBadge] = useState<string | null>(null);
+    const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if ((comment.replies?.length ?? 0) > 0) {
@@ -185,13 +187,17 @@ export default function Comment({
                         </p>
 
                         {(commentData.reactionsCount?.total ?? 0) > 0 && (
-                            <div className="absolute -bottom-3 right-4 z-10 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 shadow-sm border border-slate-100 select-none group">
+                            <div
+                                className="absolute -bottom-3 right-4 z-10 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 shadow-sm border border-slate-100 select-none"
+                                onMouseEnter={() => { if (hoverTimer.current) clearTimeout(hoverTimer.current); setHoverBadge('comment'); }}
+                                onMouseLeave={() => { hoverTimer.current = setTimeout(() => setHoverBadge(null), 200); }}
+                            >
                                 <span className="text-[11px] bg-blue-500 rounded-full w-3.5 h-3.5 flex items-center justify-center text-white">👍</span>
                                 <span className="text-[12px] font-bold text-slate-700 tracking-wide mt-0.5">
                                     {commentData.reactionsCount?.total}
                                 </span>
                                 {commentData.reactionsUsers && commentData.reactionsUsers.length > 0 && (
-                                    <div className="hidden group-hover:block">
+                                    <div className={hoverBadge === 'comment' ? 'block' : 'hidden'}>
                                         <ReactionsListPopup
                                             reactionsUsers={commentData.reactionsUsers}
                                             reactionsCount={commentData.reactionsCount?.total ?? 0}
@@ -307,10 +313,14 @@ export default function Comment({
                                                         onReact={(type) => handleReplyReact(reply.id, type)}
                                                     />
                                                     {(reply.reactionsCount?.total ?? 0) > 0 && (
-                                                        <span className="text-slate-500 relative group">
+                                                        <span
+                                                            className="text-slate-500 relative"
+                                                            onMouseEnter={() => { if (hoverTimer.current) clearTimeout(hoverTimer.current); setHoverBadge(`reply-${reply.id}`); }}
+                                                            onMouseLeave={() => { hoverTimer.current = setTimeout(() => setHoverBadge(null), 200); }}
+                                                        >
                                                             {reply.reactionsCount?.total} reaction{reply.reactionsCount?.total === 1 ? '' : 's'}
                                                             {reply.reactionsUsers && reply.reactionsUsers.length > 0 && (
-                                                                <div className="hidden group-hover:block">
+                                                                <div className={hoverBadge === `reply-${reply.id}` ? 'block' : 'hidden'}>
                                                                     <ReactionsListPopup
                                                                         reactionsUsers={reply.reactionsUsers}
                                                                         reactionsCount={reply.reactionsCount?.total ?? 0}
