@@ -46,6 +46,9 @@ export async function addComment(postId: string, formData: FormData) {
   if (!text?.trim()) {
     return { success: false, error: 'Comment cannot be empty.' };
   }
+  if (text.length > 1000) {
+    return { success: false, error: 'Comment must not exceed 1000 characters.' };
+  }
 
   const cookieStore = await cookies();
   const token = cookieStore.get('session_token')?.value;
@@ -71,6 +74,9 @@ export async function addReply(postId: string, commentId: string, formData: Form
   const text = formData.get('text') as string;
   if (!text?.trim()) {
     return { success: false, error: 'Reply cannot be empty.' };
+  }
+  if (text.length > 1000) {
+    return { success: false, error: 'Reply must not exceed 1000 characters.' };
   }
 
   const cookieStore = await cookies();

@@ -59,6 +59,7 @@ export default function Comments({ postId }: CommentsProps) {
         const newComment: CommentResponse = {
           ...data,
           reactionsCount: { total: 0, breakdown: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 } },
+          reactionsUsers: [],
           currentUserReaction: null,
         };
         setComments((prev) => [...prev, newComment]);

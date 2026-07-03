@@ -37,11 +37,27 @@ export async function registerAction(prevState: any, formData: FormData) {
     return { error: 'All fields are strictly required to create an account.' };
   }
 
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { error: 'Please enter a valid email address.' };
+  }
+
+  if (password.length < 6) {
+    return { error: 'Password must be at least 6 characters long.' };
+  }
+
+  if (password !== confirmPassword) {
+    return { error: 'Passwords do not match.' };
+  }
+
+  if (firstName.length > 50 || lastName.length > 50) {
+    return { error: 'Name fields must not exceed 50 characters.' };
+  }
+
   try {
     const response = await fetch(`${NEXT_EXTERNAL_API_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ firstName, lastName, email, password, confirmPassword }),
+      body: JSON.stringify({ firstName, lastName, email, password }),
     });
 
     const data = await response.json();

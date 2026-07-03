@@ -12,7 +12,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +62,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
     setFileError(null);
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
-        setFileError(`File too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 10MB.`);
+        setFileError(`File too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 5MB.`);
         if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }

@@ -23,6 +23,7 @@ export interface CommentResponse {
   user: UserMeta;
   reactionsCount?: ReactionSummary;
   currentUserReaction?: string | null;
+  reactionsUsers?: Array<{ id: string; email: string; firstName: string; lastName?: string; type: string }>;
   replies?: CommentResponse[];
 }
 

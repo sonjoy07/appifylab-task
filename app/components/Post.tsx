@@ -1,6 +1,7 @@
 "use client"
 import React, { JSX, useEffect, useRef, useState } from 'react'
 import ReactionSelector from './ReactionSelector';
+import ReactionsListPopup from './ReactionsListPopup';
 import { PostResponse } from '@/app/lib/types';
 import ReactTimeAgo from "react-time-ago"
 import TimeAgo from 'javascript-time-ago';
@@ -206,8 +207,7 @@ export default function Post( {post, onReactionChange}: {post: PostResponse, onR
             {/* 4. METRICS ROW PANEL (Likes Overlap Cluster & Counter Stats) */}
             <div className="flex items-center justify-between border-b border-slate-100/80 px-5 pb-4 mb-1">
 
-                {/* Left Side: Overlapping Reactions Stack */}
-                <div className="flex items-center">
+                <div className="flex items-center relative group">
                     <div className="flex -space-x-2 overflow-hidden py-1">
                         {(post.reactionsUsers ?? []).map((url, idx) => (
                             <svg
@@ -227,10 +227,17 @@ export default function Post( {post, onReactionChange}: {post: PostResponse, onR
                             </svg>
                         ))}
                     </div>
-                    {/* Reaction Extent Total Counter Badge */}
                     {post.reactionsCount?.total !== 0 &&<div className="ml-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#1890FF] text-[10px] font-bold text-white ring-2 ring-white select-none">
                         {post.reactionsCount?.total>9 ? `${post.reactionsCount?.total}+`: post.reactionsCount?.total}
                     </div>}
+                    {post.reactionsUsers && post.reactionsUsers.length > 0 && (
+                        <div className="hidden group-hover:block">
+                            <ReactionsListPopup
+                                reactionsUsers={post.reactionsUsers}
+                                reactionsCount={post.reactionsCount?.total ?? 0}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Side: Comments and Shares Counts */}

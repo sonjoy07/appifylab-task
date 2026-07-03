@@ -5,6 +5,12 @@ import { PostResponse } from '@/app/lib/types';
 
 const NEXT_EXTERNAL_API_URL = process.env.NEXT_EXTERNAL_API_URL || 'http://localhost:4000';
 
+function toAbsoluteImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${NEXT_EXTERNAL_API_URL}${url}`;
+}
+
 export interface PaginatedPosts {
   data: PostResponse[];
   meta: {
@@ -40,7 +46,14 @@ export async function getPostsAction(page = 1, limit = 10): Promise<PaginatedPos
     }
 
     const data = await response.json();
-    return data as PaginatedPosts;
+    const posts = data as PaginatedPosts;
+    if (posts.data) {
+      posts.data = posts.data.map((post) => ({
+        ...post,
+        mediaImageUrl: toAbsoluteImageUrl(post.mediaImageUrl),
+      }));
+    }
+    return posts;
   } catch (error) {
     console.error('>>> [GET POSTS API ERROR]:', error);
     return {
@@ -58,8 +71,12 @@ export async function createPostAction(prevState: any, formData: FormData) {
     return { error: 'Cannot submit an empty post. Provide text or an image.' };
   }
 
-  if (attachedFile && attachedFile.size > 10 * 1024 * 1024) {
-    return { error: `File too large (${(attachedFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 10MB.` };
+  if (textContent.length > 5000) {
+    return { error: 'Post text must not exceed 5000 characters.' };
+  }
+
+  if (attachedFile && attachedFile.size > 5 * 1024 * 1024) {
+    return { error: `File too large (${(attachedFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 5MB.` };
   }
 
   try {
@@ -87,7 +104,7 @@ export async function createPostAction(prevState: any, formData: FormData) {
       return { success: false, message: '', error: data.message || 'Failed to broadcast post to server backend.' };
     }
 
-    return { success: true, message: 'Post created successfully!', error: '', createdPost: data };
+    return { success: true, message: 'Post created successfully!', error: '', createdPost: { ...data, mediaImageUrl: toAbsoluteImageUrl(data.mediaImageUrl) } };
   } catch (error: any) {
     return { success: false, message: '', error: 'Internal network connection dropped. Please try again.' };
   }

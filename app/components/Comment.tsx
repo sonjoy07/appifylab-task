@@ -3,6 +3,7 @@ import ReactTimeAgo from 'react-time-ago';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import CommentReactionSelector from './CommentReactionSelector';
+import ReactionsListPopup from './ReactionsListPopup';
 import type { CommentResponse } from '@/app/lib/types';
 import { apiFetch } from '@/app/lib/api-client';
 
@@ -63,6 +64,7 @@ export default function Comment({
                 const newReply: CommentResponse = {
                     ...data,
                     reactionsCount: { total: 0, breakdown: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 } },
+                    reactionsUsers: [],
                     currentUserReaction: null,
                 };
                 setReplies((prev) => [...prev, newReply]);
@@ -87,6 +89,14 @@ export default function Comment({
             else if (!prevReaction && reactionType) delta = 1;
             const newTotal = Math.max(0, prevCount + delta);
 
+            const newReactionsUsers = [...(prev.reactionsUsers ?? [])];
+            if (prevReaction && prevReaction.toLowerCase() !== 'none') {
+                newReactionsUsers.splice(0, 1);
+            }
+            if (reactionType && reactionType.toLowerCase() !== 'none') {
+                newReactionsUsers.unshift({ id: '', email: '', firstName: 'You', type: reactionType });
+            }
+
             return {
                 ...prev,
                 currentUserReaction: reactionType ?? null,
@@ -94,6 +104,7 @@ export default function Comment({
                     total: newTotal,
                     breakdown: prev.reactionsCount?.breakdown ?? { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
                 },
+                reactionsUsers: newReactionsUsers,
             };
         });
     };
@@ -109,6 +120,14 @@ export default function Comment({
                 else if (!prevReaction && reactionType) delta = 1;
                 const newTotal = Math.max(0, prevCount + delta);
 
+                const newReactionsUsers = [...(r.reactionsUsers ?? [])];
+                if (prevReaction && prevReaction.toLowerCase() !== 'none') {
+                    newReactionsUsers.splice(0, 1);
+                }
+                if (reactionType && reactionType.toLowerCase() !== 'none') {
+                    newReactionsUsers.unshift({ id: '', email: '', firstName: 'You', type: reactionType });
+                }
+
                 return {
                     ...r,
                     currentUserReaction: reactionType ?? null,
@@ -116,6 +135,7 @@ export default function Comment({
                         total: newTotal,
                         breakdown: r.reactionsCount?.breakdown ?? { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
                     },
+                    reactionsUsers: newReactionsUsers,
                 };
             })
         );
@@ -165,11 +185,19 @@ export default function Comment({
                         </p>
 
                         {(commentData.reactionsCount?.total ?? 0) > 0 && (
-                            <div className="absolute -bottom-3 right-4 z-10 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 shadow-sm border border-slate-100 select-none">
+                            <div className="absolute -bottom-3 right-4 z-10 flex items-center gap-1 rounded-full bg-white px-2 py-0.5 shadow-sm border border-slate-100 select-none group">
                                 <span className="text-[11px] bg-blue-500 rounded-full w-3.5 h-3.5 flex items-center justify-center text-white">👍</span>
                                 <span className="text-[12px] font-bold text-slate-700 tracking-wide mt-0.5">
                                     {commentData.reactionsCount?.total}
                                 </span>
+                                {commentData.reactionsUsers && commentData.reactionsUsers.length > 0 && (
+                                    <div className="hidden group-hover:block">
+                                        <ReactionsListPopup
+                                            reactionsUsers={commentData.reactionsUsers}
+                                            reactionsCount={commentData.reactionsCount?.total ?? 0}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -279,7 +307,17 @@ export default function Comment({
                                                         onReact={(type) => handleReplyReact(reply.id, type)}
                                                     />
                                                     {(reply.reactionsCount?.total ?? 0) > 0 && (
-                                                        <span className="text-slate-500">{reply.reactionsCount?.total} reaction{reply.reactionsCount?.total === 1 ? '' : 's'}</span>
+                                                        <span className="text-slate-500 relative group">
+                                                            {reply.reactionsCount?.total} reaction{reply.reactionsCount?.total === 1 ? '' : 's'}
+                                                            {reply.reactionsUsers && reply.reactionsUsers.length > 0 && (
+                                                                <div className="hidden group-hover:block">
+                                                                    <ReactionsListPopup
+                                                                        reactionsUsers={reply.reactionsUsers}
+                                                                        reactionsCount={reply.reactionsCount?.total ?? 0}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </span>
                                                     )}
                                                     <span className="text-slate-400 font-normal ml-1">.</span>
                                                     <ReactTimeAgo className='text-slate-400' date={new Date(reply.createdAt)} locale="bn" />
