@@ -31,6 +31,8 @@ interface MenuOption {
 export default function Post( {post}: {post: PostResponse}) {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
+    const apiUrl = process.env.NEXT_EXTERNAL_API_URL || 'http://localhost:4000';
+    
     //  post = {
     //     timeAgo: '5 minute ago',
     //     privacy: 'Public',
@@ -45,7 +47,6 @@ export default function Post( {post}: {post: PostResponse}) {
     //         'https://unsplash.com',
     //     ]
     // };
-    console.log('post',post.user.firstName)
     const options: MenuOption[] = [
         {
             label: 'Save Post',
@@ -192,7 +193,7 @@ export default function Post( {post}: {post: PostResponse}) {
             {post.mediaImageUrl && <div className="w-full px-5 mb-4">
                 <div className="overflow-hidden rounded-xl border border-slate-100/50 max-h-[420px] flex items-center justify-center bg-slate-50">
                     <img
-                        src={post.mediaImageUrl}
+                        src={`${apiUrl}${post.mediaImageUrl}`}
                         alt="Post content visualization"
                         className="w-full h-auto object-cover"
                     />
@@ -238,8 +239,13 @@ export default function Post( {post}: {post: PostResponse}) {
 
             {/* 5. INTERACTIVE FOOTER ACTIONS PANEL ROW */}
             <div className="grid grid-cols-3 h-12 bg-white">
-                <div className="flex items-center justify-center border-r border-slate-50 bg-[#E6F7FF]">
-                    <ReactionSelector />
+                <div className={`flex items-center justify-center border-r border-slate-50 ${post.currentUserReaction?
+                    'bg-[#E6F7FF]': ''}`}>
+                    <ReactionSelector
+                      postId={post.id}
+                      initialReaction={post.currentUserReaction ?? 'Like'}
+                      disabled={post.isOwner ?? false}
+                    />
                 </div>
 
                 {/* Comment Action Key Trigger Button */}

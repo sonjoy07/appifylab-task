@@ -11,6 +11,7 @@ interface CommentData {
     firstName: string;
     lastName: string;
   };
+  replies?: CommentData[];
 }
 
 interface CommentsProps {
@@ -154,6 +155,7 @@ export default function Comments({ postId }: CommentsProps) {
             {commentsToDisplay.map((comment) => (
               <Comment
                 key={comment.id}
+                postId={postId}
                 comment={comment}
                 showPreviousCommentsButton={!showAllComments && previousCommentsCount > 0}
                 previousCommentsCount={previousCommentsCount}

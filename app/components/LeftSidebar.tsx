@@ -160,7 +160,7 @@ export default function LeftSidebar() {
                     ))}
                 </nav>
             </aside>
-            <div className="w-full ml-25 mt-5 max-w-[280px] rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm">
+            <div className="w-full ml-20 mt-5 max-w-[280px] rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm">
 
                 {/* Header Layout Zone */}
                 <div className="mb-6 flex items-center justify-between">
@@ -215,7 +215,7 @@ export default function LeftSidebar() {
                 </div>
 
             </div>
-            <div className="w-full ml-25 mt-5 max-w-[280px] rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm">
+            <div className="w-full ml-20 mt-5 max-w-[280px] rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm">
 
                 {/* Header Layout Section */}
                 <div className="mb-4 flex items-center justify-between">

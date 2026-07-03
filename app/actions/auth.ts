@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-const EXTERNAL_API_URL = process.env.EXTERNAL_API_URL || "http://localhost:4000";
+const NEXT_EXTERNAL_API_URL = process.env.NEXT_EXTERNAL_API_URL || "http://localhost:4000";
 
 const COOKIE_NAME = 'session_token';
 const COOKIE_OPTIONS = {
@@ -38,7 +38,7 @@ export async function registerAction(prevState: any, formData: FormData) {
   }
 
   try {
-    const response = await fetch(`${EXTERNAL_API_URL}/auth/signup`, {
+    const response = await fetch(`${NEXT_EXTERNAL_API_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ firstName, lastName, email, password, confirmPassword }),
@@ -73,7 +73,7 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 
   try {    
-    const response = await fetch(`${EXTERNAL_API_URL}/auth/signin`, {
+    const response = await fetch(`${NEXT_EXTERNAL_API_URL}/auth/signin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),

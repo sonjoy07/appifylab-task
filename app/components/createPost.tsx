@@ -1,8 +1,13 @@
 "use client"
 import React, { JSX, useState, useRef, ChangeEvent, useActionState, useEffect } from 'react';
-import { createPostAction } from '@/app/actions/posts';
+import { createPostAction } from '@/app/actions/feed';
+import { PostResponse } from '@/app/lib/types';
 
-export default function CreatePost(): JSX.Element {
+interface CreatePostProps {
+  onPostCreated?: (post: PostResponse) => void;
+}
+
+export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Element {
   const [postText, setPostText] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -11,16 +16,31 @@ export default function CreatePost(): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [state, formAction, isPending] = useActionState(createPostAction, null);
+  const createdPostIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
-    if (state?.success) {
+    if (!state) return;
+
+    if (!state?.success) {
+      createdPostIdRef.current = null;
+    }
+
+    if (state.success) {
       setPostText('');
       if (imagePreview) URL.revokeObjectURL(imagePreview);
       setImagePreview(null);
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
       if (fileInputRef.current) fileInputRef.current.value = '';
+
+      const createdPost = state.createdPost as PostResponse | undefined;
+      const createdPostId = createdPost?.id;
+
+      if (onPostCreated && createdPost && createdPostId != null && createdPostIdRef.current !== createdPostId) {
+        onPostCreated(createdPost);
+        createdPostIdRef.current = createdPostId;
+      }
     }
-  }, [state]);
+  }, [state, imagePreview, onPostCreated]);
 
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
