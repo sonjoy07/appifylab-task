@@ -253,7 +253,7 @@ export default function Post( {post, onReactionChange}: {post: PostResponse, onR
                     'bg-[#E6F7FF]': ''}`}>
                     <ReactionSelector
                       postId={post.id}
-                      initialReaction={post.currentUserReaction ?? 'Like'}
+                      initialReaction={post.currentUserReaction}
                       disabled={post.isOwner ?? false}
                       onReactionChange={onReactionChange}
                     />

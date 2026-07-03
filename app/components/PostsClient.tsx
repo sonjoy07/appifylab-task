@@ -6,6 +6,7 @@ import Post from './Post';
 import CreatePost from './CreatePost';
 import Comments from './Comments';
 import { apiFetch } from '@/app/lib/api-client';
+import { getProfileAction } from '@/app/actions/auth';
 
 interface PostsClientProps {
   initialPosts: PostResponse[];
@@ -24,7 +25,14 @@ export default function PostsClient({ initialPosts, initialMeta }: PostsClientPr
   const [page, setPage] = useState(initialMeta.currentPage);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ firstName: string; lastName: string; id: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    getProfileAction().then((u) => {
+      if (u) setCurrentUser(u);
+    });
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -94,7 +102,7 @@ export default function PostsClient({ initialPosts, initialMeta }: PostsClientPr
           if (newBreakdown[key] !== undefined) newBreakdown[key] += 1;
           newTotal += 1;
           newReactionsUsers = [
-            { id: '', email: '', firstName: '', type: newReaction },
+            { id: currentUser?.id ?? '', email: '', firstName: currentUser?.firstName ?? 'You', type: newReaction },
             ...newReactionsUsers,
           ];
         }

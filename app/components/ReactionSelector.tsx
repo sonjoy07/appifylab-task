@@ -11,7 +11,7 @@ type ReactionType = {
 
 interface ReactionSelectorProps {
     postId: string;
-    initialReaction?: string;
+    initialReaction?: string | null;
     disabled?: boolean;
     onReactionChange?: (newReaction: string | null, oldReaction: string | null) => void;
 }
@@ -25,15 +25,15 @@ const reactionList: ReactionType[] = [
     { name: 'Angry', emoji: '😡', colorClass: 'text-[#FF5722]' },
 ];
 
-const normalizeReaction = (reaction?: string): string => {
-    if (!reaction) return 'Like';
+const normalizeReaction = (reaction?: string | null): string | null => {
+    if (!reaction) return null;
     const normalized = reaction.toLowerCase();
     const match = reactionList.find((react) => react.name.toLowerCase() === normalized);
-    return match?.name ?? 'Like';
+    return match?.name ?? null;
 };
 
-export default function ReactionSelector({ postId, initialReaction = 'Like', disabled = false, onReactionChange }: ReactionSelectorProps) {
-    const [currentReaction, setCurrentReaction] = useState(normalizeReaction(initialReaction));
+export default function ReactionSelector({ postId, initialReaction, disabled = false, onReactionChange }: ReactionSelectorProps) {
+    const [currentReaction, setCurrentReaction] = useState<string | null>(normalizeReaction(initialReaction));
     const [isHovered, setIsHovered] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -42,7 +42,7 @@ export default function ReactionSelector({ postId, initialReaction = 'Like', dis
         setCurrentReaction(normalizeReaction(initialReaction));
     }, [initialReaction]);
 
-    const selectedReaction = reactionList.find((reaction) => reaction.name === currentReaction) ?? reactionList[0];
+    const selectedReaction = reactionList.find((reaction) => reaction.name === currentReaction) ?? null;
 
     const handleSelectReaction = (type: string) => {
         if (disabled) return;
@@ -53,7 +53,7 @@ export default function ReactionSelector({ postId, initialReaction = 'Like', dis
         const isTogglingOff = type === previousReaction;
 
         if (isTogglingOff) {
-            setCurrentReaction('Like');
+            setCurrentReaction(null);
             onReactionChange?.(null, previousReaction);
         } else {
             setCurrentReaction(type);
@@ -64,7 +64,7 @@ export default function ReactionSelector({ postId, initialReaction = 'Like', dis
             const result = await toggleReactionAction(postId, type);
             if (!result.success) {
                 setCurrentReaction(previousReaction);
-                onReactionChange?.(previousReaction, isTogglingOff ? 'Like' : type);
+                onReactionChange?.(previousReaction, isTogglingOff ? null : type);
                 setErrorMessage(result.error || 'Action not allowed.');
                 setTimeout(() => setErrorMessage(null), 3000);
             }
@@ -102,10 +102,16 @@ export default function ReactionSelector({ postId, initialReaction = 'Like', dis
             <button
                 type="button"
                 disabled={disabled}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-slate-50'} ${selectedReaction.colorClass}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-slate-50'} ${selectedReaction?.colorClass ?? 'text-slate-500'}`}
             >
-                <span>{selectedReaction.emoji}</span>
-                <span className={selectedReaction.colorClass}>{selectedReaction.name.toUpperCase()}</span>
+                {selectedReaction ? (
+                    <>
+                        <span>{selectedReaction.emoji}</span>
+                        <span className={selectedReaction.colorClass}>{selectedReaction.name.toUpperCase()}</span>
+                    </>
+                ) : (
+                    <span>Like</span>
+                )}
             </button>
         </div>
     );

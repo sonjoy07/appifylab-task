@@ -6,6 +6,7 @@ import CommentReactionSelector from './CommentReactionSelector';
 import ReactionsListPopup from './ReactionsListPopup';
 import type { CommentResponse } from '@/app/lib/types';
 import { apiFetch } from '@/app/lib/api-client';
+import { getProfileAction } from '@/app/actions/auth';
 
 TimeAgo.addDefaultLocale(en);
 
@@ -25,6 +26,13 @@ export default function Comment({
     onShowPrevious,
 }: CommentProps) {
     const authorName = `${comment.user?.firstName ?? ''} ${comment.user?.lastName ?? ''}`.trim() || 'Unknown User';
+    const [currentUser, setCurrentUser] = useState<{ firstName: string; lastName: string; id: string } | null>(null);
+
+    useEffect(() => {
+        getProfileAction().then((u) => {
+            if (u) setCurrentUser(u);
+        });
+    }, []);
 
     const [isReplying, setReplying] = useState((comment.replies?.length ?? 0) > 0);
     const [showAllReplies, setShowAllReplies] = useState(false);
@@ -96,7 +104,7 @@ export default function Comment({
                 newReactionsUsers.splice(0, 1);
             }
             if (reactionType && reactionType.toLowerCase() !== 'none') {
-                newReactionsUsers.unshift({ id: '', email: '', firstName: 'You', type: reactionType });
+                newReactionsUsers.unshift({ id: currentUser?.id ?? '', email: '', firstName: currentUser?.firstName ?? 'You', type: reactionType });
             }
 
             return {
@@ -127,7 +135,7 @@ export default function Comment({
                     newReactionsUsers.splice(0, 1);
                 }
                 if (reactionType && reactionType.toLowerCase() !== 'none') {
-                    newReactionsUsers.unshift({ id: '', email: '', firstName: 'You', type: reactionType });
+                    newReactionsUsers.unshift({ id: currentUser?.id ?? '', email: '', firstName: currentUser?.firstName ?? 'You', type: reactionType });
                 }
 
                 return {
