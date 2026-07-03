@@ -1,10 +1,13 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Header from '../components/Header';
 import LeftSidebar from '../components/LeftSidebar';
 import RightSidebar from '../components/RightSidebar';
 import Story from '../components/Story';
 import PostsClient from '../components/PostsClient';
 import { getPostsAction } from '@/app/actions/feed';
+
+export const metadata: Metadata = { title: 'Feed' };
 
 export default async function page() {
   const postsData = await getPostsAction(1, 10);

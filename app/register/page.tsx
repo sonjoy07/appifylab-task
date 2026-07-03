@@ -1,5 +1,8 @@
 import Image from "next/image";
-import LoginForm from "../components/RegisterForm";
+import RegisterForm from "../components/RegisterForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Sign Up" };
 
 export default function Register() {
   return (
@@ -50,7 +53,7 @@ export default function Register() {
             style={{ width: '100%', height: 'auto' }}
           />
         </div>
-       <LoginForm/>
+       <RegisterForm/>
       </main>
     </div>
   );
