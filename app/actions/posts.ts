@@ -11,6 +11,7 @@ export interface PostResponse {
   createdAt: string;
   privacy: string;
   totalComments:number;
+  reactionsUsers: Array<{id:string,email:string,firstName: string,LastName: string}>
   reactionsCount:{
     total: number;
   }

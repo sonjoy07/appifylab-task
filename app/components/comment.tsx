@@ -124,6 +124,9 @@ export default function Comment({
                     setLiked(true);
                     setLikesCount((count) => count + 1);
                 }
+            } else if (response.status === 403) {
+                // user attempted to react to their own comment
+                alert(data.message || 'Action not allowed.');
             } else {
                 console.error('Like request failed:', data);
             }
@@ -156,6 +159,8 @@ export default function Comment({
                     setReplyLiked((prev) => ({ ...prev, [replyId]: true }));
                     setReplyLikeCounts((prev) => ({ ...prev, [replyId]: (prev[replyId] ?? 0) + 1 }));
                 }
+            } else if (response.status === 403) {
+                alert(data.message || 'Action not allowed.');
             } else {
                 console.error('Reply like request failed:', data);
             }

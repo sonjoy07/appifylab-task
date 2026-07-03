@@ -102,26 +102,26 @@ export default function LeftSidebar() {
             id: '1',
             name: 'Steve Jobs',
             role: 'CEO of Apple',
-            imageUrl: 'https://unsplash.com',
+            imageUrl: '/people1.png',
         },
         {
             id: '2',
             name: 'Ryan Roslansky',
             role: 'CEO of Linkedin',
-            imageUrl: 'https://unsplash.com',
+            imageUrl: '/people2.png',
         },
         {
             id: '3',
             name: 'Dylan Field',
             role: 'CEO of Figma',
-            imageUrl: 'https://unsplash.com',
+            imageUrl: '/people3.png',
         },
     ];
     const event: EventData = {
         title: 'No more terrorism no more cry',
         day: '10',
         month: 'Jul',
-        imageUrl: 'https://unsplash.com', // A placeholder protest/crowd image
+        imageUrl: '/feed_event1.png', // A placeholder protest/crowd image
         attendeesCount: 17,
     };
     return (

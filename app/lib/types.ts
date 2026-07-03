@@ -30,6 +30,7 @@ export interface PostResponse {
     };
   };
   currentUserReaction?: string | null;
+  reactionsUsers?: Array<{ id: string; email: string; firstName: string; lastName?: string; type: string }>;
   isOwner?: boolean;
   user: UserMeta;
   comments?: CommentResponse[];

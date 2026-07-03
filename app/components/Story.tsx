@@ -11,20 +11,20 @@ export default function Story() {
         {
             id: '1',
             userName: 'Ryan Roslansky',
-            storyImageUrl: 'https://unsplash.com',
-            userAvatarUrl: 'https://unsplash.com',
+            storyImageUrl: '/card_ppl2.png',
+            userAvatarUrl: '/chat1_img.png',
         },
         {
             id: '2',
             userName: 'Ryan Roslansky',
-            storyImageUrl: 'https://unsplash.com',
-            userAvatarUrl: 'https://unsplash.com',
+            storyImageUrl: '/card_ppl3.png',
+            userAvatarUrl: '/chat1_img.png',
         },
         {
             id: '3',
             userName: 'Ryan Roslansky',
-            storyImageUrl: 'https://unsplash.com',
-            userAvatarUrl: 'https://unsplash.com',
+            storyImageUrl: '/card_ppl4.png',
+            userAvatarUrl: '/chat1_img.png',
         },
     ];
     return (
@@ -35,7 +35,7 @@ export default function Story() {
                 {/* Background Half Image */}
                 <div className="h-2/3 w-full overflow-hidden">
                     <img
-                        src="https://unsplash.com"
+                        src="/card_ppl1.png"
                         alt="Your portrait"
                         className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
                     />

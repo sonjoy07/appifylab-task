@@ -32,7 +32,7 @@ export default function Post( {post}: {post: PostResponse}) {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const apiUrl = process.env.NEXT_EXTERNAL_API_URL || 'http://localhost:4000';
-    
+    console.log('post',post)
     //  post = {
     //     timeAgo: '5 minute ago',
     //     privacy: 'Public',
@@ -206,7 +206,7 @@ export default function Post( {post}: {post: PostResponse}) {
                 {/* Left Side: Overlapping Reactions Stack */}
                 <div className="flex items-center">
                     <div className="flex -space-x-2 overflow-hidden py-1">
-                        {/* {post.reactionsPreview.map((url, idx) => (
+                        {post.reactionsUsers.map((url, idx) => (
                             <svg
                                 key={idx}
                                 xmlns="http://w3.org"
@@ -222,7 +222,7 @@ export default function Post( {post}: {post: PostResponse}) {
                                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                                 <circle cx="12" cy="7" r="4" />
                             </svg>
-                        ))} */}
+                        ))}
                     </div>
                     {/* Reaction Extent Total Counter Badge */}
                     {post.reactionsCount.total !== 0 &&<div className="ml-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#1890FF] text-[10px] font-bold text-white ring-2 ring-white select-none">
