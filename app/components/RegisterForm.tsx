@@ -3,6 +3,7 @@ import Image from "next/image";
 import { JSX, useActionState, useEffect } from "react";
 import { registerAction } from "../actions/auth";
 import { useRouter } from "next/navigation";
+import Link from 'next/link';
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -167,12 +168,12 @@ export default function RegisterForm() {
                     <div className="mb-2 pb-10">
                         <p className="mt-20 text-md text-slate-600">
                             Already have an account?{' '}
-                            <a
-                                href="#"
+                            <Link
+                                href="/login"
                                 className="font-medium text-[#1890FF] hover:text-[#0073e6] transition-colors duration-200"
                             >
                                 Login here
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </form>

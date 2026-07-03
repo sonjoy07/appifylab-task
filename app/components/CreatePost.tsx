@@ -7,13 +7,21 @@ interface CreatePostProps {
   onPostCreated?: (post: PostResponse) => void;
 }
 
+const PRIVACY_OPTIONS = [
+  { value: 'public', label: 'Public', icon: '🌐' },
+  { value: 'private', label: 'Private', icon: '🔒' },
+];
+
 export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Element {
   const [postText, setPostText] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [privacy, setPrivacy] = useState('public');
+  const [showPrivacyDropdown, setShowPrivacyDropdown] = useState(false);
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+  const privacyRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -29,6 +37,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
 
     if (state.success) {
       setPostText('');
+      setPrivacy('public');
       if (imagePreview) URL.revokeObjectURL(imagePreview);
       setImagePreview(null);
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
@@ -44,6 +53,15 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
     }
   }, [state, imagePreview, onPostCreated]);
 
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (privacyRef.current && !privacyRef.current.contains(e.target as Node)) {
+        setShowPrivacyDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
     const val = e.target.value;
@@ -227,13 +245,41 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
             </button>
 
 
-            <button type="button" className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-slate-500 hover:bg-slate-200/60 transition-colors cursor-pointer">
+            {/* <button type="button" className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-slate-500 hover:bg-slate-200/60 transition-colors cursor-pointer">
               <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span>Article</span>
-            </button>
+            </button> */}
+
+            <div className="relative ml-auto" ref={privacyRef}>
+              <button
+                type="button"
+                onClick={() => setShowPrivacyDropdown(!showPrivacyDropdown)}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-slate-500 hover:bg-slate-200/60 transition-colors cursor-pointer"
+              >
+                <span>{PRIVACY_OPTIONS.find(o => o.value === privacy)?.icon}</span>
+                <span>{PRIVACY_OPTIONS.find(o => o.value === privacy)?.label}</span>
+              </button>
+              {showPrivacyDropdown && (
+                <div className="absolute bottom-full right-0 mb-1 z-50 min-w-[140px] rounded-xl bg-white shadow-lg border border-slate-200 p-1.5">
+                  {PRIVACY_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => { setPrivacy(opt.value); setShowPrivacyDropdown(false); }}
+                      className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${privacy === opt.value ? 'bg-[#E6F7FF] text-[#1890FF]' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                      <span>{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          <input type="hidden" name="privacy" value={privacy} />
 
           <button
             type="submit"

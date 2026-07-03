@@ -66,6 +66,7 @@ export async function getPostsAction(page = 1, limit = 10): Promise<PaginatedPos
 export async function createPostAction(prevState: any, formData: FormData) {
   const textContent = formData.get('textContent') as string;
   const attachedFile = formData.get('attachedFile') as File;
+  const privacy = formData.get('privacy') as string;
 
   if (!textContent.trim() && (!attachedFile || attachedFile.size === 0)) {
     return { error: 'Cannot submit an empty post. Provide text or an image.' };
@@ -85,6 +86,7 @@ export async function createPostAction(prevState: any, formData: FormData) {
 
     const apiPayload = new FormData();
     apiPayload.append('textContent', textContent);
+    apiPayload.append('privacy', privacy || 'public');
 
     if (attachedFile && attachedFile.size > 0) {
       apiPayload.append('image', attachedFile);
