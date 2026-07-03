@@ -29,9 +29,16 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
 
   const [state, formAction, isPending] = useActionState(createPostAction, null);
   const createdPostIdRef = useRef<string | number | null>(null);
+  const tagRef = useRef('');
 
   useEffect(() => {
     if (!state) return;
+
+    const tag = state.success
+      ? `ok-${(state.createdPost as PostResponse | undefined)?.id ?? ''}`
+      : `err-${state.error ?? ''}`;
+    if (tag === tagRef.current) return;
+    tagRef.current = tag;
 
     if (state.success) {
       setPostText('');
@@ -53,7 +60,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
     } else if (state.error) {
       setToast({ type: 'error', text: state.error });
     }
-  }, [state, imagePreview, onPostCreated]);
+  }, [state, onPostCreated]);
 
   useEffect(() => {
     if (toast) {
