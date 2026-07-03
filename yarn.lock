@@ -1823,7 +1823,7 @@ iterator.prototype@^1.1.5:
     has-symbols "^1.1.0"
     set-function-name "^2.0.2"
 
-javascript-time-ago@^2.3.7:
+javascript-time-ago@^2.3.7, javascript-time-ago@^2.6.4:
   version "2.6.4"
   resolved "https://registry.npmjs.org/javascript-time-ago/-/javascript-time-ago-2.6.4.tgz"
   integrity sha512-7K/Z37LuwVaxxjutUDd1pXpznufPcox0b1UYu00ksAMMlV6IsxIvduwL3kgfPxuBVF8jVj7nhrKMPDslMq94aQ==
