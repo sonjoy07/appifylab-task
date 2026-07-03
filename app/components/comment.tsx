@@ -7,6 +7,7 @@ interface CommentData {
     id: string;
     text: string;
     createdAt: string;
+    likesCount?: number;
     user: {
         firstName: string;
         lastName: string;
@@ -15,13 +16,21 @@ interface CommentData {
 
 interface CommentProps {
     comment: CommentData;
+    showPreviousCommentsButton?: boolean;
+    previousCommentsCount?: number;
+    onShowPrevious?: () => void;
 }
 
 if (!TimeAgo.alreadyRegistered?.(en)) {
     TimeAgo.addDefaultLocale(en);
 }
 
-export default function Comment({ comment }: CommentProps) {
+export default function Comment({
+    comment,
+    showPreviousCommentsButton,
+    previousCommentsCount,
+    onShowPrevious,
+}: CommentProps) {
     const authorName = [comment.user?.firstName, comment.user?.lastName]
         .filter(Boolean)
         .join(' ') || 'Unknown User';
@@ -29,11 +38,17 @@ export default function Comment({ comment }: CommentProps) {
     return (
         <div className="w-full max-w-[620px] rounded-b-2xl border-t border-slate-100 bg-white font-sans mb-5">
             
-            <div className="mb-5 px-1">
-                <button type="button" className="text-[14px] font-bold text-slate-500 hover:text-[#1890FF] hover:underline cursor-pointer transition-colors">
-                    View 4 previous comments
-                </button>
-            </div>
+            {showPreviousCommentsButton && previousCommentsCount ? (
+                <div className="mb-5 px-1">
+                    <button
+                        type="button"
+                        onClick={onShowPrevious}
+                        className="text-[14px] font-bold text-slate-500 hover:text-[#1890FF] hover:underline cursor-pointer transition-colors"
+                    >
+                        View {previousCommentsCount} previous comment{previousCommentsCount > 1 ? 's' : ''}
+                    </button>
+                </div>
+            ) : null}
             <div className="flex items-start gap-3">
                 <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-slate-100 mt-1">
                     <svg
@@ -54,7 +69,7 @@ export default function Comment({ comment }: CommentProps) {
                 <div className="flex flex-grow flex-col">
                     <div className="relative rounded-2xl bg-[#F0F2F5]/70 px-4 py-3 pb-4">
                         <span className="block text-[14px] font-bold text-slate-800 hover:text-[#1890FF] cursor-pointer transition-colors leading-tight mb-1">
-                            {comment.authorName}
+                            {authorName}
                         </span>
                         <p className="text-[14px] font-medium leading-relaxed text-slate-600 break-words pr-2">
                             {comment.text}
@@ -80,6 +95,7 @@ export default function Comment({ comment }: CommentProps) {
                         <span className="text-slate-400 font-normal">.</span>
                         <button type="button" className="hover:text-[#1890FF] cursor-pointer">Share</button>
                         <span className="text-slate-400 font-normal ml-1">.</span>
+                        <ReactTimeAgo className='text-slate-400' date={comment.createdAt} locale="bn"/>
                     </div>
 
                     {/* 4. NESTED REPLY INPUT CAPSULE BOX */}

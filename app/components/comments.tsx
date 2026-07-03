@@ -19,6 +19,8 @@ interface CommentsProps {
 
 export default function Comments({ postId }: CommentsProps) {
   const [comments, setComments] = useState<CommentData[]>([]);
+  const [newCommentsCount, setNewCommentsCount] = useState(0);
+  const [showAllComments, setShowAllComments] = useState(false);
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -63,6 +65,8 @@ export default function Comments({ postId }: CommentsProps) {
         setFeedback(data.message || 'Failed to save comment.');
       } else {
         setComments((prev) => [...prev, data]);
+        setNewCommentsCount((count) => count + 1);
+        setShowAllComments(true);
         setText('');
         setFeedback('Comment posted successfully.');
       }
@@ -134,9 +138,31 @@ export default function Comments({ postId }: CommentsProps) {
         {/* {feedback && <div className="mt-3 text-sm text-slate-600">{feedback}</div>} */}
       </form>
 
-      {comments.map((comment:CommentData) => (
-        <Comment key={comment.id} comment={comment} />
-      ))}
+      {(() => {
+        const totalCount = comments.length;
+        const latestComment = comments[comments.length - 1];
+
+        const previousCommentsCount = showAllComments ? 0 : Math.max(0, totalCount - 1);
+        const commentsToDisplay = showAllComments
+          ? comments
+          : latestComment
+          ? [latestComment]
+          : [];
+
+        return (
+          <>
+            {commentsToDisplay.map((comment) => (
+              <Comment
+                key={comment.id}
+                comment={comment}
+                showPreviousCommentsButton={!showAllComments && previousCommentsCount > 0}
+                previousCommentsCount={previousCommentsCount}
+                onShowPrevious={() => setShowAllComments(true)}
+              />
+            ))}
+          </>
+        );
+      })()}
     </div>
   );
 }
