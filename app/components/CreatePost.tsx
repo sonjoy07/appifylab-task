@@ -21,6 +21,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
   const [showPrivacyDropdown, setShowPrivacyDropdown] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const MAX_FILE_SIZE = 5 * 1024 * 1024;
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
   const privacyRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -105,14 +106,17 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
     const file = e.target.files?.[0];
     setFileError(null);
     if (file) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        setFileError('Only JPG, JPEG, PNG, and WebP images are allowed.');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
       if (file.size > MAX_FILE_SIZE) {
         setFileError(`File too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 5MB.`);
         if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
       setSelectedImage(file);
-
-     
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
     }
@@ -261,12 +265,12 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
             </button>
 
 
-            {/* <button type="button" className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-slate-500 hover:bg-slate-200/60 transition-colors cursor-pointer">
+            <button type="button" className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-slate-500 hover:bg-slate-200/60 transition-colors cursor-pointer">
               <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span>Article</span>
-            </button> */}
+            </button>
 
             <div className="relative ml-auto" ref={privacyRef}>
               <button
@@ -299,8 +303,8 @@ export default function CreatePost({ onPostCreated }: CreatePostProps): JSX.Elem
 
           <button
             type="submit"
-            disabled={postText.trim().length === 0 || isPending}
-            className={`flex items-center gap-2 rounded-xl bg-[#1890FF] px-6 py-2.5 text-base font-bold text-white shadow-sm hover:bg-[#0050B3] transition-all cursor-pointer ${postText.trim().length === 0 || isPending ? 'opacity-70 cursor-not-allowed' : ''
+            disabled={postText.trim().length === 0 || isPending || (selectedImage !== null && !ALLOWED_TYPES.includes(selectedImage.type))}
+            className={`flex items-center gap-2 rounded-xl bg-[#1890FF] px-6 py-2.5 text-base font-bold text-white shadow-sm hover:bg-[#0050B3] transition-all cursor-pointer ${postText.trim().length === 0 || isPending || (selectedImage !== null && !ALLOWED_TYPES.includes(selectedImage.type)) ? 'opacity-70 cursor-not-allowed' : ''
               }`}
           >
             {isPending ? (

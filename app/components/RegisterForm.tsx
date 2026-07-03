@@ -160,9 +160,10 @@ export default function RegisterForm() {
                     <div>
                         <button
                             type="submit"
-                            className="flex w-full justify-center rounded-md bg-[#1890FF] px-4 py-3 text-md cursor-pointer font-semibold text-white shadow-sm hover:bg-[#1890FF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890FF] transition"
+                            className="flex w-full justify-center rounded-md bg-[#1890FF] px-4 py-3 text-md cursor-pointer font-semibold text-white shadow-sm hover:bg-[#1890FF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890FF] transition cursor-pointer"
                         >
                             Register now
+                            {isPending ? 'Signing up...' : 'Register now'}
                         </button>
                     </div>
                     <div className="mb-2 pb-10">
